@@ -10,6 +10,7 @@
 
 - [ADR-001: Multi-Agent File-Based Collaboration Architecture](#adr-001-multi-agent-file-based-collaboration-architecture)
 - [ADR-002: Tooling Runtime & Scripting Standard](#adr-002-tooling-runtime--scripting-standard)
+- [ADR-003: Session Archiving & Resuming Architecture](#adr-003-session-archiving--resuming-architecture)
 
 ---
 
@@ -43,3 +44,18 @@
 - **Consequences:**
   - Zero external npm install required for core management.
   - Cross-platform compatible (Windows, macOS, Linux).
+
+### `ADR-003`: Session Archiving & Resuming Architecture
+- **Date:** 2026-11-09
+- **Status:** `ACCEPTED`
+- **Deciders:** `@Antigravity`, User
+- **Context:**
+  When a sprint, milestone, or topic concludes, the workspace collaboration files (`USER_INBOX.md`, `TASKS.md`, `AGENT_COMMUNICATION.md`, `ACTIVITY_LOG.md`, `PROJECT_STATE.md`) accumulate completed tasks and long message threads. Users need a reliable, frictionless way to freeze and archive a session into a project subfolder (`archives/<timestamp>_<name>/`), reset the workspace for a fresh sprint, and easily resume an older session at any point.
+- **Decision:**
+  Implement file-based session management in `scripts/hub.js`:
+  1. **Archive:** Copies the 5 dynamic collaboration files into `archives/<timestamp>_<name>/`, produces a `session.json` manifest with task and message stats, and generates an archive README.
+  2. **Fresh Session Reset:** Cleans the 5 active files with fresh template scaffolds while preserving all static agent configurations, rules, and scripts.
+  3. **Safe Resume:** Auto-backs up any active uncommitted files into `archives/_stash_<timestamp>/` prior to restoration, preventing any accidental data loss, restores the archived session, logs the event to `ACTIVITY_LOG.md`, and posts an announcement to `AGENT_COMMUNICATION.md`.
+- **Consequences:**
+  - **Positive:** Zero data loss guarantee; git-trackable session history; instant switching between feature sprints or agent experiments.
+  - **Negative:** Users and agents must specify the session name or index when resuming.

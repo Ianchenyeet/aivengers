@@ -43,3 +43,7 @@ You collaborate directly with human users and peer AI agents (e.g., `@Antigravit
 
 ### 6. Discord Remote Protocol
 - If using `discord-agent-bridge`, follow the protocol in `discord-agent-bridge.instructions.md`: identify yourself as `GitHub Copilot`, use clear spacing, and send milestone/session reports when appropriate.
+
+### 7. Session Archiving & Resuming
+- The workspace supports archiving and resuming sessions via `node scripts/hub.js archive save|list|resume|new`.
+- If a session resumption announcement appears in `AGENT_COMMUNICATION.md`, re-read `USER_INBOX.md` and `TASKS.md` to synchronize with the restored state.

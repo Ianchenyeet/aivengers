@@ -102,6 +102,7 @@ node scripts/hub.js msg --from "@Antigravity" --to "@Copilot" --type "HANDOFF" -
 
 ## 🛠️ Hub CLI Quick Reference
 
+### Workspace Operations
 | Command | Description |
 | :--- | :--- |
 | `npm run status` | Display user directives, active tasks, locks, and messages |
@@ -111,6 +112,49 @@ node scripts/hub.js msg --from "@Antigravity" --to "@Copilot" --type "HANDOFF" -
 | `node scripts/hub.js complete <ID> <Agent>` | Mark task completed and log it |
 | `node scripts/hub.js msg --from <A> --to <B> --subject <S> --body <M>` | Post inter-agent message |
 | `node scripts/hub.js log --agent <A> --action <X> --files <F>` | Record action in audit log |
+
+### 📦 Session Archiving & Resuming
+| Command | Description |
+| :--- | :--- |
+| `npm run archive:save [name]` | Save current collaboration files to `archives/<timestamp>_<name>/` |
+| `npm run archive:list` (or `npm run sessions`) | List all saved sessions with task stats and summaries |
+| `npm run archive:resume <name or index>` | Restore an archived session back into active workspace (auto-stashes active state) |
+| `npm run archive:new [name]` | Archive current session and prepare clean collaboration templates for a new sprint |
+
+---
+
+## 📦 How Session Archiving & Resuming Works
+
+When a feature sprint or multi-agent co-development session concludes:
+
+1. **Save Current Session:**
+   ```bash
+   node scripts/hub.js archive save "vibe-commit-tool"
+   # or
+   npm run archive:save -- "vibe-commit-tool"
+   ```
+   Copies `USER_INBOX.md`, `TASKS.md`, `AGENT_COMMUNICATION.md`, `ACTIVITY_LOG.md`, and `PROJECT_STATE.md` into `archives/YYYY-MM-DD_vibe-commit-tool/` along with a `session.json` metadata file and an archive README.
+
+2. **Start a Fresh Session:**
+   ```bash
+   node scripts/hub.js archive new "vibe-prompt-enhancer"
+   ```
+   Archives the active files and resets the workspace to clean templates with empty task boards and instructions intact.
+
+3. **Browse Saved Sessions:**
+   ```bash
+   npm run sessions
+   ```
+
+4. **Resume Any Session:**
+   ```bash
+   node scripts/hub.js archive resume 1
+   # or by name:
+   node scripts/hub.js archive resume "vibe-commit-tool"
+   ```
+   Restores all collaboration files to the workspace root, takes an automatic safety backup of current active files in `archives/_stash_<timestamp>/`, and notifies active agents in `AGENT_COMMUNICATION.md`.
+
+---
 
 ---
 

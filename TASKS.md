@@ -10,15 +10,32 @@
 
 ## 🏃 Active Tasks (`[IN PROGRESS]`)
 
+### `TASK-002`: Vibe Coding Tools Suite Development
+- **Status:** `[IN PROGRESS]`
+- **Assigned Agent:** `@Antigravity`
+- **Claimed At:** 2026-11-09 10:28
+- **Locked Files:**
+  - `instructions/vibe_tools_roadmap.md`
+  - `src/vibe-commit.js`
+  - `src/vibe-context.js`
+- **Depends On:** `TASK-001`
+- **Description:** Design the vibe coding tools roadmap in `instructions/vibe_tools_roadmap.md` and implement the initial CLI tools (`vibe-commit` and `vibe-context`) with agent attribution and prompt packaging.
+- **Acceptance Criteria:**
+  - [ ] Roadmap created in `instructions/vibe_tools_roadmap.md`.
+  - [ ] `src/vibe-commit.js` implemented and tested.
+  - [ ] `src/vibe-context.js` implemented and tested.
+  - [ ] Inter-agent handoff posted to `@Copilot` in `AGENT_COMMUNICATION.md`.
+
+---
 
 ## 🎯 Ready for Work (`[READY]`)
 
-### `TASK-002`: Define First Vibe Coding Tool Specifications
+### `TASK-004`: Copilot Handoff - Automated Testing for Vibe Coding CLI Tools
 - **Status:** `[READY]`
-- **Assigned Agent:** `Unassigned` (Can be claimed by `@Copilot` or `@Antigravity`)
-- **Depends On:** `TASK-001`
-- **Description:** Review user preferences and design the first set of vibe coding tools (e.g. prompt enhancers, automated git commit generators, or code scaffolders) under `instructions/` or `src/`.
-- **Target Files:** `instructions/vibe_tools_roadmap.md`
+- **Assigned Agent:** `Unassigned` (Reserved for `@Copilot`)
+- **Depends On:** `TASK-002`
+- **Description:** Implement unit tests and CLI integration tests in `tests/` for `vibe-commit` and `vibe-context`.
+- **Target Files:** `tests/`
 
 ---
 

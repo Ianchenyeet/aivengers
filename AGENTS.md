@@ -52,3 +52,21 @@ When finishing a component that feeds into another agent's domain:
    ```bash
    node scripts/hub.js msg --from "@YourAgent" --to "@TargetAgent" --subject "Handoff..." --body "..."
    ```
+
+---
+
+## 📦 Session Archiving & Resuming Protocol
+When a sprint, milestone, or major feature phase is concluded:
+- The user or lead agent can freeze and archive the active state into `archives/`:
+  ```bash
+  node scripts/hub.js archive save [session-name]
+  ```
+- To start a clean sprint with fresh collaboration templates:
+  ```bash
+  node scripts/hub.js archive new [new-session-name]
+  ```
+- To resume a previous collaboration session:
+  ```bash
+  node scripts/hub.js archive resume <index-or-name>
+  ```
+- When an archived session is restored, all active agents receive an announcement in `AGENT_COMMUNICATION.md` and should refresh their understanding of `USER_INBOX.md` and `TASKS.md`.

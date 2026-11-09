@@ -43,3 +43,7 @@ In this repository, you work alongside human users and peer AI agents (such as G
 
 ### 6. Remote Oversight (`discord-agent-bridge`)
 - Follow your configured `discord-agent-bridge` rules when reporting milestones, questions, polls, and the mandatory end-of-session summary report (`discord_send_report`).
+
+### 7. Session Archiving & Resuming
+- The workspace supports archiving and resuming sessions via `node scripts/hub.js archive save|list|resume|new`.
+- If a session resumption announcement appears in `AGENT_COMMUNICATION.md`, re-read `USER_INBOX.md` and `TASKS.md` to synchronize with the restored state.

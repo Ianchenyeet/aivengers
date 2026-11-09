@@ -19,3 +19,6 @@ yarn-error.log*
 .env
 .env.local
 *.secret
+
+# Session Stashes (Temporary auto-backups before resume)
+archives/_stash_*
