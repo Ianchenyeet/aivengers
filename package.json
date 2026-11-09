@@ -7,6 +7,8 @@
     "status": "node scripts/hub.js status",
     "inbox": "node scripts/hub.js inbox",
     "tasks": "node scripts/hub.js tasks",
+    "commit": "node src/vibe-commit.js",
+    "context": "node src/vibe-context.js",
     "archive:save": "node scripts/hub.js archive save",
     "archive:list": "node scripts/hub.js archive list",
     "archive:resume": "node scripts/hub.js archive resume",
