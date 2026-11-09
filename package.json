@@ -1,0 +1,23 @@
+{
+  "name": "vibe-coding-tools",
+  "version": "1.0.0",
+  "description": "Multi-agent collaborative workspace for vibe coding and autonomous agent coordination",
+  "main": "scripts/hub.js",
+  "scripts": {
+    "status": "node scripts/hub.js status",
+    "inbox": "node scripts/hub.js inbox",
+    "tasks": "node scripts/hub.js tasks",
+    "help": "node scripts/hub.js help"
+  },
+  "keywords": [
+    "multi-agent",
+    "vibe-coding",
+    "antigravity",
+    "copilot",
+    "cursor",
+    "claude",
+    "collaboration"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,16 @@
+---
+description: Multi-agent collaboration workspace protocol
+globs: *
+alwaysApply: true
+---
+
+# Cursor Multi-Agent Collaboration Rule
+
+You are operating within a shared repository alongside `@Antigravity`, `@Copilot`, and human developers.
+
+### Workflow:
+1. **User Ingestion:** Check `USER_INBOX.md` for current user directives.
+2. **Task Concurrency:** In `TASKS.md`, check `[IN PROGRESS]` tasks. Never modify files listed under another agent's `Locked Files`.
+3. **Claim Tasks:** Before editing files, claim your task in `TASKS.md` with `@Cursor` and list your target locked files.
+4. **Inter-Agent Communication:** Use `AGENT_COMMUNICATION.md` for handoffs (`[HANDOFF]`), review requests (`[REVIEW_REQUEST]`), or questions.
+5. **Decisions & Audit:** Respect `DECISIONS.md` and log finished work in `ACTIVITY_LOG.md`.
