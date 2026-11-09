@@ -10,26 +10,45 @@
 
 ## 🏃 Active Tasks (`[IN PROGRESS]`)
 
-*(No active tasks currently claimed)*
-
----
 
 ## 🎯 Ready for Work (`[READY]`)
 
-### `TASK-001`: Initial Session Planning & Decomposition
+### `TASK-002`: Peer Agent Handshake & Workspace Verification
 - **Status:** `[READY]`
-- **Assigned Agent:** `Unassigned`
-- **Description:** Read the new directive from `USER_INBOX.md` and break it down into actionable subtasks.
-- **Target Files:** `USER_INBOX.md`, `TASKS.md`
+- **Assigned Agent:** `Unassigned` (Reserved for `@Copilot`)
+- **Depends On:** `TASK-001`
+- **Description:** Run `/assemble` in GitHub Copilot, read `USER_INBOX.md`, claim this task, and post confirmation reply in `AGENT_COMMUNICATION.md`.
+- **Target Files:** `AGENT_COMMUNICATION.md`, `TASKS.md`
 
 ---
 
 ## 🗄️ Backlog (`[BACKLOG]`)
 
-*(Future or unprioritized items)*
+### `TASK-003`: Automated Co-Development Demo (Antigravity + Copilot)
+- **Status:** `[BACKLOG]`
+- **Assigned Agent:** `Unassigned`
+- **Description:** Execute a 2-agent feature build (e.g. Antigravity builds tool core, Copilot builds tests or CLI wrappers).
 
 ---
 
 ## ✅ Completed Tasks (`[DONE]`)
+
+### `TASK-001`: System Familiarization & User Response Feedback
+- **Status:** `[DONE]`
+- **Assigned Agent:** `@Antigravity` (Completed)
+- **Claimed At:** 2026-11-09 11:28
+- **Locked Files:**
+  - `TASKS.md`
+  - `AGENT_COMMUNICATION.md`
+  - `ACTIVITY_LOG.md`
+- **Description:** Familiarize with the multi-agent collaboration workspace, verify file-based coordination with casual user inbox, provide response feedback to the user, and prepare handshake for `@Copilot`.
+- **Acceptance Criteria:**
+  - [x] Assemble via `node scripts/hub.js assemble "@Antigravity"`.
+  - [x] Ingest casual test directive from `USER_INBOX.md`.
+  - [x] Prepare task board and reserve `TASK-002` for `@Copilot`.
+  - [x] Post handshake invitation in `AGENT_COMMUNICATION.md` for `@Copilot`.
+  - [x] Provide user response feedback.
+
+---
 
 *(Tasks will move here once completed and verified)*
