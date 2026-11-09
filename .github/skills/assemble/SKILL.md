@@ -1,8 +1,8 @@
 ---
 name: assemble
-description: Assemble into the multi-agent workspace, read USER_INBOX.md, and coordinate with peer agents.
+description: "Assemble into the multi-agent workspace, read USER_INBOX.md, and coordinate with peer agents."
+disable-model-invocation: true
 ---
-
 You are now assembled into the Multi-Agent Workspace (`vibe coding tools`).
 
 Follow this workflow:

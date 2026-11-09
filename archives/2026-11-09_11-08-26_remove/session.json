@@ -1,0 +1,22 @@
+{
+  "id": "session-2026-11-09_11-08-26",
+  "name": "remove",
+  "title": "create a agent colaboration workspace in",
+  "folder": "2026-11-09_11-08-26_remove",
+  "archivedAt": "2026-11-09 11:08",
+  "archivedBy": "@User",
+  "summary": "create a agent colaboration workspace in this project folder, where different agents (ex:antigravity and copilot) can have a way to easily cooperate, communicat",
+  "stats": {
+    "tasksCompleted": 2,
+    "tasksInProgress": 0,
+    "tasksReady": 1,
+    "messages": 5
+  },
+  "files": [
+    "USER_INBOX.md",
+    "TASKS.md",
+    "AGENT_COMMUNICATION.md",
+    "ACTIVITY_LOG.md",
+    "PROJECT_STATE.md"
+  ]
+}
