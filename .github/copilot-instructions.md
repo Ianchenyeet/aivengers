@@ -27,3 +27,7 @@ When the user enters `/assemble` (or triggers the `.github/prompts/assemble.prom
 3. **Coordinate & Handoff:**
    - Communicate with peer agents (e.g. `@Antigravity`, `@Cursor`) using `AGENT_COMMUNICATION.md`.
    - When finished, mark `[DONE]` or `[IN REVIEW]` in `TASKS.md` and log to `ACTIVITY_LOG.md`.
+
+4. **User Communication via Discord:**
+   - Whenever you need to ask questions, clarify requirements, or get user decisions, use `discord_ask_poll` (for multiple choice) or `discord_ask_question` with `agent_name: "GitHub Copilot"`.
+   - Send milestone or final session reports using `discord_send_report`.

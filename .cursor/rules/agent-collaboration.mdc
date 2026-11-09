@@ -12,3 +12,5 @@ alwaysApply: true
   2. Run `node scripts/hub.js assemble "@Cursor"` to announce your assembly.
   3. In `TASKS.md`, check active tasks and respect `Locked Files`.
   4. Claim a task, lock your target files, and coordinate handoffs in `AGENT_COMMUNICATION.md`.
+
+  5. Use `discord-agent-bridge` MCP tools (`discord_ask_poll`, `discord_ask_question`) when asking questions or presenting choices to the user.

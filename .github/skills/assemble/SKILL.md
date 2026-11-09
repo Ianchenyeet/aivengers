@@ -12,3 +12,4 @@ Follow this workflow:
 4. Claim an available task in `TASKS.md` or decompose the user's request.
 5. Work on the task, respecting locks held by other agents.
 6. Post any handoffs or updates to `@Antigravity` or `@All` in `AGENT_COMMUNICATION.md`.
+7. **User Questions & Polls:** Whenever you need user feedback, clarification, or design choices, use the `discord-agent-bridge` MCP tools (`discord_ask_poll` for polls or `discord_ask_question` for open questions) identifying yourself as `agent_name: "GitHub Copilot"`.

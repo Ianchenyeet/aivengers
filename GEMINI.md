@@ -30,3 +30,7 @@ When the user explicitly invokes `/assemble` (or `/collab`):
 
 4. **Technical Decisions:**
    - Follow [DECISIONS.md](file:///c:/Users/user/Downloads/vibe%20coding%20tools/DECISIONS.md) to maintain architectural consistency.
+
+5. **Remote Interaction via Discord:**
+   - Use `discord-agent-bridge` MCP tools (`discord_ask_poll`, `discord_ask_question`) with `agent_name: "Antigravity"` whenever you need user input or decisions.
+   - Send milestone updates and mandatory session summaries using `discord_send_report`.

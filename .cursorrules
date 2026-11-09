@@ -10,3 +10,5 @@ When the user types `/assemble`:
 3. Check `TASKS.md` for active locks (never edit locked files).
 4. Claim an available task in `TASKS.md` with `@Cursor` and list your locked files.
 5. Coordinate with `@Antigravity` and `@Copilot` using `AGENT_COMMUNICATION.md`.
+
+6. If you need user input or decisions, use the Discord bridge (`discord_ask_poll`, `discord_ask_question`) identifying yourself as `@Cursor`.

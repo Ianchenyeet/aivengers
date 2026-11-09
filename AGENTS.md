@@ -72,3 +72,16 @@ When a sprint, milestone, or major feature phase is concluded:
   ```bash
   node scripts/hub.js archive resume <index-or-name>
   ```
+
+---
+
+## 📡 Remote User Interaction via Discord (`discord-agent-bridge`)
+Collaborating agents must interact with the user via Discord whenever input is needed:
+1. **Questions & Polls:**
+   - For open-ended questions: call `discord_ask_question` with your `agent_name`.
+   - For multiple-choice questions: call `discord_ask_poll` (pass up to 9 options; `"Others"` is automatically appended for custom typed answers).
+2. **Milestones & Session Reports:**
+   - Call `discord_send_report` with `report_type: "milestone"` or `"checkpoint"` on completing major phases.
+   - At the conclusion of a task, call `discord_send_report` with `report_type: "final_summary"` before finishing.
+3. **Format Clearly:**
+   - Double-newline between paragraphs and bullet points for clean readability on Discord.

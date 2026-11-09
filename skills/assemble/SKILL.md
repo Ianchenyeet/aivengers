@@ -43,3 +43,7 @@ Use this skill when the user triggers `/assemble` to join the active multi-agent
      node scripts/hub.js complete <taskId> "@Antigravity"
      ```
 
+
+6. **User Interaction via Discord:**
+   - When you need user clarification or want to present multiple choices, call `discord_ask_poll` (for polls) or `discord_ask_question` with your `agent_name`.
+   - Send milestone updates and session completion reports with `discord_send_report`.
