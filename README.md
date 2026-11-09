@@ -47,39 +47,47 @@ vibe coding tools/
 
 ## 👤 How the Human User Interacts
 
-### 1. Give New Instructions
-Open **`USER_INBOX.md`** and write your request under `## ⚡ Active User Directives`:
+### 1. Write Naturally in `USER_INBOX.md` (Zero Restrictions)
+Open **`USER_INBOX.md`** and write what you want done in plain, casual language — exactly how you talk:
 ```markdown
-### 📌 Current Focus: Build Git Commit Message Generator CLI
-- **Requested By:** User
-- **Status:** [READY]
-- **Summary:** Create a Node.js tool in src/git-vibe.js that generates commit messages based on git diff.
+# 📥 User Inbox
+
+create a dark mode toggle for the landing page and make sure unit tests pass
 ```
+No rigid templates, no mandatory status tags, no YAML keys. Just write what you want.
 
-### 2. For Large Feature Specs
-Drop a spec file into `instructions/` (e.g. `instructions/git_vibe_spec.md`) and reference it in `USER_INBOX.md`.
+### 2. Assemble the Agents You Want via `/assemble`
+Normal prompts in your agent windows will be answered normally without triggering multi-agent coordination.
+Whenever you want specific agents to work together on what's in `USER_INBOX.md`:
+1. Open the agent window you want (e.g. Antigravity, GitHub Copilot, Cursor, or Claude).
+2. Type:
+   ```
+   /assemble
+   ```
+3. That specific agent will assemble into the workspace, read your casual instructions from `USER_INBOX.md`, synchronize with any other assembled agents in `AGENT_COMMUNICATION.md`, claim tasks in `TASKS.md`, and start building!
 
-### 3. Check Overall Progress
+### 3. Check Overall Workspace Status
 Run in terminal:
 ```bash
-node scripts/hub.js status
-# or
 npm run status
+# or
+node scripts/hub.js assemble @Antigravity
 ```
 
 ---
 
 ## 🤖 How AI Agents Operate
 
-When any AI agent opens this folder, its designated rules file (`GEMINI.md`, `.github/copilot-instructions.md`, etc.) activates the **Agent Lifecycle**:
+- **Normal Prompt:** The agent operates as a standard single-agent assistant.
+- **When `/assemble` is typed:** The agent enters the **Multi-Agent Lifecycle**:
 
 ```
-1. Ingest User Directive  ──>  Read USER_INBOX.md
-2. Check Task Board       ──>  Read TASKS.md
-3. Claim Task & Lock      ──>  Mark [IN PROGRESS] with agent name & target files
-4. Implement & Test       ──>  Work only within locked files
-5. Handoff or Complete    ──>  Post in AGENT_COMMUNICATION.md, mark [DONE],
-                               and append to ACTIVITY_LOG.md
+1. Assemble into Workspace  ──>  Triggered by user typing /assemble
+2. Ingest Casual Request   ──>  Read USER_INBOX.md
+3. Decompose & Plan        ──>  Break down into tasks in TASKS.md
+4. Lock Files & Claim      ──>  Set [IN PROGRESS] with agent name & target files
+5. Implement & Test        ──>  Work safely within locked files
+6. Handoff or Complete     ──>  Post in AGENT_COMMUNICATION.md & update ACTIVITY_LOG.md
 ```
 
 ### 🔒 File Locking (Preventing Collisions)

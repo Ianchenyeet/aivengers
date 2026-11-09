@@ -5,45 +5,25 @@ description: Multi-agent collaboration workspace instructions for GitHub Copilot
 
 # GitHub Copilot Workspace Protocol (`vibe coding tools`)
 
-You are operating inside a **Collaborative Multi-Agent Workspace**.
-You collaborate directly with human users and peer AI agents (e.g., `@Antigravity`, `@Claude`, `@Cursor`).
+## ⚡ Default Behavior (Normal Prompts)
+When the user sends normal prompts or code edits without `/assemble`:
+- Treat it as a standard request and respond directly.
+- Do NOT read `USER_INBOX.md`, modify `TASKS.md`, or notify other agents.
 
 ---
 
-## ⚡ Core Operational Instructions
+## 🚀 Workspace Assembly Mode: `/assemble`
+When the user enters `/assemble` (or triggers the `.github/prompts/assemble.prompt.md` prompt):
 
-### 1. Ingest User Instructions First
-- At the start of every session or task turn, check **`USER_INBOX.md`**.
-- Read `## ⚡ Active User Directives` and `## 🎯 High-Level Project Goals & Priorities`.
-- Treat directives in `USER_INBOX.md` as the official instruction source from the user.
-- Check `instructions/` if the directive references deep specifications.
+1. **Assemble into Collaboration:**
+   - Read the user's plain-English directive from `USER_INBOX.md`.
+   - Announce assembly to peers by running `node scripts/hub.js assemble "@Copilot"` or posting a message to `AGENT_COMMUNICATION.md`.
 
-### 2. Task Planning & Concurrency Protection (`TASKS.md`)
-- Always inspect **`TASKS.md`** before writing or editing files.
-- **Claiming Tasks:** Before you edit code, claim the task by updating `TASKS.md`:
-  - Set `Status: [IN PROGRESS]`
-  - Set `Assigned Agent: @Copilot`
-  - Fill in `Locked Files:` with every file you will modify.
-- **File Locks:** Never modify files listed under `Locked Files` of another active agent's task.
-- **Finishing Work:** When finished and verified, update status to `[IN REVIEW]` (if requesting Antigravity/user verification) or `[DONE]`.
+2. **Check Tasks & Anti-Collision Locks:**
+   - Review `TASKS.md` for active tasks and locks.
+   - Never touch files marked under `Locked Files` of another active agent.
+   - Claim an unassigned task: update status to `[IN PROGRESS]`, set `Assigned Agent: @Copilot`, and list files you will modify under `Locked Files`.
 
-### 3. Agent-to-Agent Communication (`AGENT_COMMUNICATION.md`)
-- Check **`AGENT_COMMUNICATION.md`** for any unread messages addressed to `@Copilot` or `@All`.
-- If you need input from `@Antigravity` or want to hand off a task (e.g. backend completed, requesting API integration or review), append a new message thread under `## 🧵 Active Threads` in `AGENT_COMMUNICATION.md`:
-  - Use format: `@Antigravity: [HANDOFF / QUESTION / REVIEW_REQUEST] ...`
-- When you resolve a request, mark its status as `[RESOLVED]`.
-
-### 4. Architectural Consensus (`DECISIONS.md`)
-- Check **`DECISIONS.md`** before selecting new libraries, tools, or major architectural patterns.
-- Do not reverse or contradict existing ADRs without user direction.
-- Document any new significant technical decisions in `DECISIONS.md`.
-
-### 5. Activity Logging (`ACTIVITY_LOG.md`)
-- Append an entry in **`ACTIVITY_LOG.md`** with timestamp, your tag (`@Copilot`), and summary of files modified.
-
-### 6. Discord Remote Protocol
-- If using `discord-agent-bridge`, follow the protocol in `discord-agent-bridge.instructions.md`: identify yourself as `GitHub Copilot`, use clear spacing, and send milestone/session reports when appropriate.
-
-### 7. Session Archiving & Resuming
-- The workspace supports archiving and resuming sessions via `node scripts/hub.js archive save|list|resume|new`.
-- If a session resumption announcement appears in `AGENT_COMMUNICATION.md`, re-read `USER_INBOX.md` and `TASKS.md` to synchronize with the restored state.
+3. **Coordinate & Handoff:**
+   - Communicate with peer agents (e.g. `@Antigravity`, `@Cursor`) using `AGENT_COMMUNICATION.md`.
+   - When finished, mark `[DONE]` or `[IN REVIEW]` in `TASKS.md` and log to `ACTIVITY_LOG.md`.

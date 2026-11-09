@@ -89,6 +89,7 @@ Usage:
   node scripts/hub.js [command] [subcommand] [options]
 
 Workspace Commands:
+  assemble [agent]                     Assemble an agent into the workspace (reads inbox & announces)
   status                               Show active user directives, in-progress tasks, and messages
   inbox                                Print active user instructions from USER_INBOX.md
   tasks                                List tasks from TASKS.md
@@ -115,21 +116,88 @@ Aliases:
 `);
 }
 
+function getCasualInboxText() {
+  const raw = readFileSafe(INBOX_PATH);
+  if (!raw) return '(USER_INBOX.md is empty)';
+  const marker = '<!-- WRITE CASUALLY BELOW THIS LINE -->';
+  if (raw.includes(marker)) {
+    return raw.split(marker)[1].trim();
+  }
+  const parts = raw.split(/^---$/m);
+  if (parts.length > 1) {
+    return parts.slice(1).join('---').trim();
+  }
+  return raw.replace(/^#\s+[^\n]*\n/, '').trim();
+}
+
+function cmdAssemble(agentName) {
+  const agent = agentName ? (agentName.startsWith('@') ? agentName : `@${agentName}`) : '@Agent';
+  const timestamp = getTimestamp();
+  const userText = getCasualInboxText();
+
+  console.log('='.repeat(60));
+  console.log(`🚀 ${agent.toUpperCase()} ASSEMBLED INTO WORKSPACE`);
+  console.log('='.repeat(60));
+
+  console.log('\n📥 USER INBOX (Casual Request):');
+  console.log(userText ? `"${userText}"\n` : '(No instructions in USER_INBOX.md yet)\n');
+
+  // Post assembly thread in AGENT_COMMUNICATION.md
+  let comm = readFileSafe(COMM_PATH);
+  const countMatches = comm.match(/### 💬 `MSG-(\d+)`/g);
+  let nextNum = 1;
+  if (countMatches && countMatches.length > 0) {
+    const last = countMatches[countMatches.length - 1];
+    const num = parseInt(last.replace(/\D/g, ''), 10);
+    if (!isNaN(num)) nextNum = num + 1;
+  }
+  const msgId = `MSG-${String(nextNum).padStart(3, '0')}`;
+  const assembleMsg = `
+### 💬 \`${msgId}\` · Agent Assembled via /assemble
+- **Date & Time:** ${timestamp}
+- **From:** \`${agent}\`
+- **To:** \`@All\`
+- **Type:** \`[ASSEMBLE]\`
+- **Status:** \`[OPEN]\`
+- **Subject:** ${agent} Joined Workspace
+- **Body:**
+  > ${agent} has been assembled into the workspace via \`/assemble\`.
+  > User Request: "${userText.slice(0, 120)}${userText.length > 120 ? '...' : ''}"
+`;
+  comm = comm.trimEnd() + '\n\n' + assembleMsg.trim() + '\n';
+  fs.writeFileSync(COMM_PATH, comm, 'utf8');
+
+  // Log to ACTIVITY_LOG.md
+  cmdLogInternal(agent, 'Assembled into workspace (/assemble)', 'USER_INBOX.md, TASKS.md', 'Joined multi-agent collaboration session');
+
+  console.log(`📋 CURRENT TASK BOARD STATUS:`);
+  const tasks = readFileSafe(TASKS_PATH);
+  const activeSection = tasks.match(/## 🏃 Active Tasks[\s\S]*?(?=## 🎯 Ready|## 🗄️ Backlog|## ✅ Completed|$)/);
+  if (activeSection) {
+    console.log(activeSection[0].trim());
+  }
+  const readySection = tasks.match(/## 🎯 Ready for Work[\s\S]*?(?=## 🗄️ Backlog|## ✅ Completed|$)/);
+  if (readySection) {
+    console.log('\n' + readySection[0].trim());
+  }
+
+  console.log('\n' + '='.repeat(60));
+  console.log(`💡 Next Steps for ${agent}:`);
+  console.log(`   1. If user request needs tasks, break it down and add to TASKS.md`);
+  console.log(`   2. Claim a task: node scripts/hub.js claim <taskId> "${agent}" "files..."`);
+  console.log(`   3. Check AGENT_COMMUNICATION.md for handoffs or messages`);
+  console.log('='.repeat(60));
+}
+
 function cmdStatus() {
   console.log('='.repeat(60));
   console.log('🤖 MULTI-AGENT WORKSPACE STATUS OVERVIEW');
   console.log('='.repeat(60));
 
   // 1. Inbox
-  const inbox = readFileSafe(INBOX_PATH);
-  console.log('\n📥 ACTIVE USER DIRECTIVE:');
-  const directiveMatch = inbox.match(/## ⚡ Active User Directives[\s\S]*?(?=---|\n## )/);
-  if (directiveMatch) {
-    const cleaned = directiveMatch[0].replace(/## ⚡ Active User Directives[^\n]*\n/, '').trim();
-    console.log(cleaned || '  (No active directives)');
-  } else {
-    console.log('  (Could not parse active directives)');
-  }
+  console.log('\n📥 USER INBOX (Prompt):');
+  const userText = getCasualInboxText();
+  console.log(userText ? `  "${userText}"` : '  (USER_INBOX.md is empty — write your prompt there!)');
 
   // 2. Active Tasks
   const tasks = readFileSafe(TASKS_PATH);
@@ -331,12 +399,14 @@ function sanitizeName(name) {
 }
 
 function extractSessionSummary() {
-  const inbox = readFileSafe(INBOX_PATH);
-  const focusMatch = inbox.match(/### 📌 Current Focus:\s*([^\n]+)/);
-  const summaryMatch = inbox.match(/- \*\*Summary:\*\*\s*([^\n]+)/);
-
-  const focus = focusMatch ? focusMatch[1].trim() : 'Active Collaboration Session';
-  const summary = summaryMatch ? summaryMatch[1].trim() : focus;
+  const userText = getCasualInboxText();
+  if (!userText || userText === '(USER_INBOX.md is empty)') {
+    return { focus: 'Collaboration Session', summary: 'General multi-agent workspace session' };
+  }
+  const lines = userText.split('\n').map(l => l.replace(/^[#\-*>\s]+/, '').trim()).filter(Boolean);
+  const firstLine = lines[0] || 'Active Session';
+  const focus = firstLine.slice(0, 40);
+  const summary = userText.slice(0, 160).replace(/\s+/g, ' ');
   return { focus, summary };
 }
 
@@ -359,39 +429,19 @@ function resetToFreshSession(newSessionTitle) {
   const sessionName = newSessionTitle || 'New Collaboration Session';
 
   // 1. Fresh USER_INBOX.md
-  const freshInbox = `# 📥 User Instructions & Directives Inbox
+  const freshInbox = `# 📥 User Inbox
 
-> **Instructions for the User:**
-> - Write your requests, tasks, feedback, or answers in the active section below.
-> - Agents (Antigravity, Copilot, etc.) will check this file whenever they activate, acknowledge receipt, breakdown tasks into \`TASKS.md\`, and execute them.
-
----
-
-## ⚡ Active User Directives (Read by Agents)
-
-<!-- USER: Place your new request or prompt here -->
-### 📌 Current Focus: ${sessionName}
-- **Requested By:** User
-- **Status:** [READY]
-- **Summary:** Describe the goal for this new collaboration session here.
-- **Key Requirements:**
-  1. (Specify key requirements here)
+> **How this works:**
+> Just type whatever you want done below in plain English (or any language) — no rules, no template to fill out, no rigid format. Talk casually just like you're chatting with an AI.
+> 
+> **To start agents:**
+> Agents will NOT automatically pick up this file on normal prompts. Whenever you're ready for specific agents to work on what's written here, just go to their chat windows and type:
+> \`/assemble\`
 
 ---
 
-## 🎯 High-Level Project Goals & Priorities
-- Focus on modular, maintainable code.
-- Coordinate smoothly across active AI agents.
+<!-- WRITE CASUALLY BELOW THIS LINE -->
 
----
-
-## 💬 User Answers & Feedback on Agent Questions
-*(No pending questions at this moment)*
-
----
-
-## 📜 Directive Archive (Completed Tasks)
-*(Archive will populate as user requests are completed)*
 `;
 
   // 2. Fresh TASKS.md
@@ -804,6 +854,10 @@ function main() {
   const command = positional[0] ? positional[0].toLowerCase() : 'help';
 
   switch (command) {
+    case 'assemble':
+    case 'collab':
+      cmdAssemble(positional[1]);
+      break;
     case 'status':
       cmdStatus();
       break;

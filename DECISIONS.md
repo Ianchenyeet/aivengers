@@ -11,6 +11,7 @@
 - [ADR-001: Multi-Agent File-Based Collaboration Architecture](#adr-001-multi-agent-file-based-collaboration-architecture)
 - [ADR-002: Tooling Runtime & Scripting Standard](#adr-002-tooling-runtime--scripting-standard)
 - [ADR-003: Session Archiving & Resuming Architecture](#adr-003-session-archiving--resuming-architecture)
+- [ADR-004: Opt-In /assemble Protocol & Casual User Inbox](#adr-004-opt-in-assemble-protocol--casual-user-inbox)
 
 ---
 
@@ -59,3 +60,16 @@
 - **Consequences:**
   - **Positive:** Zero data loss guarantee; git-trackable session history; instant switching between feature sprints or agent experiments.
   - **Negative:** Users and agents must specify the session name or index when resuming.
+
+### `ADR-004`: Opt-In /assemble Protocol & Casual User Inbox
+- **Date:** 2026-11-09
+- **Status:** `ACCEPTED`
+- **Deciders:** User, `@Antigravity`
+- **Context:**
+  Originally, agents were instructed to automatically read `USER_INBOX.md` and enter multi-agent coordination on every single prompt. This caused friction when the user just wanted a quick, normal answer from a single agent. Additionally, `USER_INBOX.md` required rigid markdown templates, making writing user prompts cumbersome.
+- **Decision:**
+  1. **Casual Inbox:** Make `USER_INBOX.md` completely freeform. The user writes plain text naturally (just like chatting), without mandatory metadata or strict structure. Agents parse and decompose the request into `TASKS.md` themselves.
+  2. **Opt-In `/assemble` Command:** Multi-agent collaboration is NOT the default. Normal prompts in any agent window behave normally. Only when the user explicitly enters `/assemble` in an agent's window does that specific agent assemble into the workspace, read `USER_INBOX.md`, check `TASKS.md`, lock files, and collaborate.
+- **Consequences:**
+  - **Positive:** Zero friction for the user; full control over which agents participate; normal single-agent prompts remain fast and unencumbered.
+  - **Negative:** User must remember to type `/assemble` in the agent windows they want to join the collaborative task.

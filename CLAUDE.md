@@ -1,16 +1,14 @@
 # Claude Code Collaboration Protocol (`vibe coding tools`)
 
-You are participating in a multi-agent vibe coding environment alongside human users, `@Antigravity`, and `@Copilot`.
+## ⚡ Default Mode
+For standard prompts without `/assemble`:
+- Respond and code normally. Do NOT access `USER_INBOX.md` or modify `TASKS.md`.
 
-## Workflow Checklist
-1. **Read `USER_INBOX.md`:** Check the active directives and goals from the user.
-2. **Review `TASKS.md`:**
-   - Look for open tasks in `[READY]` or create new ones from user directives.
-   - Claim your task by setting `Status: [IN PROGRESS]`, `Assigned Agent: @Claude`, and list your `Locked Files`.
-   - Never touch files locked by other agents.
-3. **Check `AGENT_COMMUNICATION.md`:** Read messages directed to `@Claude` or `@All`. Leave handoffs or review requests for peer agents.
-4. **Consult `DECISIONS.md`:** Ensure proposed tech choices match existing ADRs.
-5. **Update and Log:**
-   - On completion, set task to `[DONE]` in `TASKS.md`.
-   - Append completed actions to `ACTIVITY_LOG.md`.
-   - If handing off, post a thread in `AGENT_COMMUNICATION.md`.
+## 🚀 Assembly Mode: `/assemble`
+When the user types `/assemble`:
+1. Run `node scripts/hub.js assemble "@Claude"` to register your assembly in `AGENT_COMMUNICATION.md`.
+2. Read the user's plain-text request in `USER_INBOX.md`.
+3. Check `TASKS.md` for active locks and ready tasks.
+4. Claim a task by setting `Status: [IN PROGRESS]`, `Assigned Agent: @Claude`, and listing `Locked Files`.
+5. Post handoffs or review requests to `@Antigravity` / `@Copilot` in `AGENT_COMMUNICATION.md`.
+6. On completion, mark `[DONE]` in `TASKS.md` and append to `ACTIVITY_LOG.md`.

@@ -80,11 +80,17 @@ function buildContext(targetAgent, includeFiles) {
   const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 16);
 
   // 1. User Directives
-  const inbox = readFileSafe(INBOX_PATH);
-  const activeDirectiveMatch = inbox.match(/## ⚡ Active User Directives[\s\S]*?(?=---|\n## )/);
-  const activeDirective = activeDirectiveMatch
-    ? activeDirectiveMatch[0].replace(/## ⚡ Active User Directives[^\n]*\n/, '').trim()
-    : '(No active user directives found)';
+  const rawInbox = readFileSafe(INBOX_PATH);
+  let activeDirective = '(No active user directives found)';
+  if (rawInbox) {
+    const marker = '<!-- WRITE CASUALLY BELOW THIS LINE -->';
+    if (rawInbox.includes(marker)) {
+      activeDirective = rawInbox.split(marker)[1].trim();
+    } else {
+      const parts = rawInbox.split(/^---$/m);
+      activeDirective = parts.length > 1 ? parts.slice(1).join('---').trim() : rawInbox;
+    }
+  }
 
   // 2. Active Tasks & Locks
   const tasks = readFileSafe(TASKS_PATH);

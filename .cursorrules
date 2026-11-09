@@ -1,13 +1,12 @@
 # Cursor Multi-Agent Collaboration Rules
 
-You are working in a multi-agent repository (`vibe coding tools`).
-Other AI agents (`@Antigravity`, `@Copilot`, `@Claude`) also contribute to this project.
+## Default Mode
+Normal prompts are handled as standard coding queries. Do not read `USER_INBOX.md` or touch `TASKS.md` unless `/assemble` is explicitly requested.
 
-## Instructions
-1. Always start by reading `USER_INBOX.md` to see current user goals and requests.
-2. Review `TASKS.md`:
-   - Never edit files marked under `Locked Files` of an active task claimed by another agent.
-   - Claim a task before editing files: set status to `[IN PROGRESS]`, `Assigned Agent: @Cursor`, and list locked files.
-3. Use `AGENT_COMMUNICATION.md` for inter-agent handoffs, questions, and review requests.
-4. Check `DECISIONS.md` before making architectural or dependency decisions.
-5. Record changes in `ACTIVITY_LOG.md` upon finishing tasks.
+## Workspace Assembly: `/assemble`
+When the user types `/assemble`:
+1. Register in the workspace by running `node scripts/hub.js assemble "@Cursor"`.
+2. Read the user's casual request in `USER_INBOX.md`.
+3. Check `TASKS.md` for active locks (never edit locked files).
+4. Claim an available task in `TASKS.md` with `@Cursor` and list your locked files.
+5. Coordinate with `@Antigravity` and `@Copilot` using `AGENT_COMMUNICATION.md`.

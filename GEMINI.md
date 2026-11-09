@@ -1,49 +1,32 @@
 # Antigravity & Gemini Workspace Protocol
 
-You are operating within a **Multi-Agent Collaborative Workspace** (`vibe coding tools`).
-In this repository, you work alongside human users and peer AI agents (such as GitHub Copilot, Cursor, and Claude).
+You are operating within the **vibe coding tools** workspace.
 
 ---
 
-## 🚀 Mandatory Operational Rules
+## ⚡ Default Behavior (Normal Prompts)
+When the user sends normal prompts or coding questions **without `/assemble`**:
+- **Act as normal:** Answer questions, edit files, or explain code directly.
+- **Do NOT** read `USER_INBOX.md`, do NOT update `TASKS.md`, and do NOT broadcast messages to other agents unless explicitly asked.
 
-### 1. Ingestion of User Instructions
-- At the start of every session or task turn, **read `USER_INBOX.md`**.
-- Look for the `## ⚡ Active User Directives` and `## 🎯 High-Level Project Goals & Priorities`.
-- If new user directives exist, translate them into actionable tasks in `TASKS.md` (or update existing tasks).
-- If the directive references documents in `instructions/`, read them thoroughly.
+---
 
-### 2. Task Planning & Concurrency Protection
-- **Check `TASKS.md`** before making any file modifications.
-- **Claim Before Coding:** Change task status to `[IN PROGRESS]`, set `Assigned Agent: @Antigravity`, note the timestamp, and list all files you plan to edit under `Locked Files`.
-- **Respect Locks:** If a file is currently locked by `@Copilot` or another agent in an active task, do not modify it without coordination.
-- Once finished, update `TASKS.md` to `[IN REVIEW]` or `[DONE]`.
+## 🚀 Workspace Assembly Mode: `/assemble` (or `/collab`)
+When the user explicitly invokes `/assemble` (or `/collab`):
 
-### 3. Peer Agent Communication & Handoffs
-- Use `AGENT_COMMUNICATION.md` to coordinate with peer agents.
-- When handing off work to another agent (e.g. asking `@Copilot` to write tests, frontend code, or review), append a new thread:
-  ```markdown
-  ### 💬 `MSG-xxx` · Handoff: <Topic>
-  - **Date & Time:** YYYY-MM-DD HH:MM
-  - **From:** @Antigravity
-  - **To:** @Copilot
-  - **Type:** [HANDOFF]
-  - **Status:** [OPEN]
-  - **Subject:** ...
-  - **Body:** ...
-  ```
-- Check `AGENT_COMMUNICATION.md` for any messages directed to `@Antigravity`.
+1. **Assemble into the Workspace:**
+   - Read the user's casual request from [USER_INBOX.md](file:///c:/Users/user/Downloads/vibe%20coding%20tools/USER_INBOX.md).
+   - Announce your assembly: run `node scripts/hub.js assemble "@Antigravity"` (or update `AGENT_COMMUNICATION.md`).
 
-### 4. Technical Consensus & ADRs
-- Consult `DECISIONS.md` before introducing new libraries, frameworks, or architectural shifts.
-- Record any significant technical choices in `DECISIONS.md`.
+2. **Task Planning & Concurrency Protection:**
+   - Inspect [TASKS.md](file:///c:/Users/user/Downloads/vibe%20coding%20tools/TASKS.md).
+   - If the user's request is not yet broken down, decompose it into actionable tasks.
+   - **File Locks:** Never edit files listed under `Locked Files` of another active agent's task.
+   - **Claim Before Coding:** Set task status to `[IN PROGRESS]`, set `Assigned Agent: @Antigravity`, and list your locked files.
 
-### 5. Audit Trail & Logging
-- Log major completions in `ACTIVITY_LOG.md`.
+3. **Peer Agent Coordination:**
+   - Use [AGENT_COMMUNICATION.md](file:///c:/Users/user/Downloads/vibe%20coding%20tools/AGENT_COMMUNICATION.md) to hand off work to peer agents (e.g. `@Copilot`, `@Cursor`) who have also assembled.
+   - When finishing a task, mark it `[DONE]` or `[IN REVIEW]` in `TASKS.md`, log to `ACTIVITY_LOG.md`, and notify peers.
 
-### 6. Remote Oversight (`discord-agent-bridge`)
-- Follow your configured `discord-agent-bridge` rules when reporting milestones, questions, polls, and the mandatory end-of-session summary report (`discord_send_report`).
-
-### 7. Session Archiving & Resuming
-- The workspace supports archiving and resuming sessions via `node scripts/hub.js archive save|list|resume|new`.
-- If a session resumption announcement appears in `AGENT_COMMUNICATION.md`, re-read `USER_INBOX.md` and `TASKS.md` to synchronize with the restored state.
+4. **Technical Decisions:**
+   - Follow [DECISIONS.md](file:///c:/Users/user/Downloads/vibe%20coding%20tools/DECISIONS.md) to maintain architectural consistency.
