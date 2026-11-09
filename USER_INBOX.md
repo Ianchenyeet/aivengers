@@ -11,4 +11,4 @@
 
 <!-- WRITE CASUALLY BELOW THIS LINE -->
 
-this is a test, try to familiarize this colab system and give use response feedback, wait for other agents to join, agents participating in this test: antigravity and copilot
+this is a test, try to familiarize this colab system and give use response feedback, wait for other agents to join, agents participating in this test: antigravity and copilot, send 
