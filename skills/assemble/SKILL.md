@@ -47,3 +47,7 @@ Use this skill when the user triggers `/assemble` to join the active multi-agent
 6. **User Interaction via Discord:**
    - When you need user clarification or want to present multiple choices, call `discord_ask_poll` (for polls) or `discord_ask_question` with your `agent_name`.
    - Send milestone updates and session completion reports with `discord_send_report`.
+
+7. **Confirm Read ("Roger That" Receipts):**
+   - Check unread messages on assembly with `node scripts/hub.js unread "@Antigravity"`.
+   - Confirm read on messages with `node scripts/hub.js read all "@Antigravity"` or `node scripts/hub.js read <msgId> "@Antigravity" ["Roger that!"]`.

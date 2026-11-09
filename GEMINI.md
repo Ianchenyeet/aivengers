@@ -24,7 +24,8 @@ When the user explicitly invokes `/assemble` (or `/collab`):
    - **File Locks:** Never edit files listed under `Locked Files` of another active agent's task.
    - **Claim Before Coding:** Set task status to `[IN PROGRESS]`, set `Assigned Agent: @Antigravity`, and list your locked files.
 
-3. **Peer Agent Coordination:**
+3. **Peer Agent Coordination & Read Confirmations:**
+   - Check unread messages on assembly: `node scripts/hub.js unread "@Antigravity"` and confirm read with `node scripts/hub.js read all "@Antigravity"` (Roger that).
    - Use [AGENT_COMMUNICATION.md](file:///c:/Users/user/Downloads/vibe%20coding%20tools/AGENT_COMMUNICATION.md) to hand off work to peer agents (e.g. `@Copilot`, `@Cursor`) who have also assembled.
    - When finishing a task, mark it `[DONE]` or `[IN REVIEW]` in `TASKS.md`, log to `ACTIVITY_LOG.md`, and notify peers.
 

@@ -58,6 +58,24 @@ When finishing a component that feeds into another agent's domain:
 
 ---
 
+## 🫡 Read Confirmations & "Roger That" Receipts
+To ensure agents stay synchronized on handoffs, announcements, and task assignments:
+1. **Check Pending Messages:**
+   ```bash
+   node scripts/hub.js unread "@YourAgent"
+   ```
+2. **Confirm Read (Roger That):**
+   ```bash
+   node scripts/hub.js read <msgId> "@YourAgent" ["optional note"]
+   # Or acknowledge all unread at once:
+   node scripts/hub.js read all "@YourAgent"
+   ```
+3. **Manual Markdown Notation:**
+   In `AGENT_COMMUNICATION.md`:
+   `- **Read By:** \`@YourAgent\` (YYYY-MM-DD HH:MM · "Roger that ✓")`
+
+---
+
 ## 📦 Session Archiving & Resuming Protocol
 When a sprint, milestone, or major feature phase is concluded:
 - Save active state to `archives/`:

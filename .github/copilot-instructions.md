@@ -24,7 +24,8 @@ When the user enters `/assemble` (or triggers the `.github/prompts/assemble.prom
    - Never touch files marked under `Locked Files` of another active agent.
    - Claim an unassigned task: update status to `[IN PROGRESS]`, set `Assigned Agent: @Copilot`, and list files you will modify under `Locked Files`.
 
-3. **Coordinate & Handoff:**
+3. **Coordinate, Confirm Read & Handoff:**
+   - Check unread messages on assembly: `node scripts/hub.js unread "@Copilot"` and acknowledge with `node scripts/hub.js read all "@Copilot"` (or set `- **Read By:** \`@Copilot\` (timestamp · "Roger that ✓")`).
    - Communicate with peer agents (e.g. `@Antigravity`, `@Cursor`) using `AGENT_COMMUNICATION.md`.
    - When finished, mark `[DONE]` or `[IN REVIEW]` in `TASKS.md` and log to `ACTIVITY_LOG.md`.
 

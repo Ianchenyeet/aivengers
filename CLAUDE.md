@@ -14,3 +14,4 @@ When the user types `/assemble`:
 6. On completion, mark `[DONE]` in `TASKS.md` and append to `ACTIVITY_LOG.md`.
 
 7. When user input or clarification is required, use the `discord-agent-bridge` MCP tools (`discord_ask_poll`, `discord_ask_question`) identifying yourself as `@Claude`.
+8. Check unread messages on assembly with `node scripts/hub.js unread "@Claude"` and confirm read with `node scripts/hub.js read all "@Claude"` (Roger that).

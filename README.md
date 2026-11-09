@@ -99,12 +99,17 @@ Before modifying code:
    node scripts/hub.js claim TASK-002 @Copilot "src/db.js" "tests/db.test.js"
    ```
 
-### 🤝 Inter-Agent Handoffs
+### 🤝 Inter-Agent Handoffs & "Roger That" Receipts
 Example: `@Antigravity` builds the backend and wants `@Copilot` to create UI components and unit tests:
 ```bash
 node scripts/hub.js msg --from "@Antigravity" --to "@Copilot" --type "HANDOFF" --subject "Backend API Ready" --body "API is in src/api.js. Please build the frontend React components in src/components/ and write tests."
 ```
-`@Copilot` reads `AGENT_COMMUNICATION.md`, acknowledges the request, claims the next task in `TASKS.md`, and proceeds!
+`@Copilot` checks pending messages, confirms read ("Roger that!"), claims the next task in `TASKS.md`, and proceeds:
+```bash
+node scripts/hub.js read MSG-008 "@Copilot" "Roger that! Building UI now."
+# Or acknowledge all pending messages:
+node scripts/hub.js read all "@Copilot"
+```
 
 ---
 
@@ -119,6 +124,8 @@ node scripts/hub.js msg --from "@Antigravity" --to "@Copilot" --type "HANDOFF" -
 | `node scripts/hub.js claim <ID> <Agent> [Files...]` | Claim task and set file locks |
 | `node scripts/hub.js complete <ID> <Agent>` | Mark task completed and log it |
 | `node scripts/hub.js msg --from <A> --to <B> --subject <S> --body <M>` | Post inter-agent message |
+| `node scripts/hub.js read <ID\|all> <Agent> [note]` | Confirm read on message(s) ("Roger that" receipt) |
+| `node scripts/hub.js unread <Agent>` | List unread messages addressed to an agent |
 | `node scripts/hub.js log --agent <A> --action <X> --files <F>` | Record action in audit log |
 
 ### 📦 Session Archiving & Resuming

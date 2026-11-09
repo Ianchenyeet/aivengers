@@ -97,6 +97,8 @@ Workspace Commands:
   complete <taskId> <agent>            Mark task as [DONE] in TASKS.md and log to ACTIVITY_LOG.md
   msg --from <agent> --to <target> --subject <subj> --body <text> [--type <TYPE>]
                                        Post a message to AGENT_COMMUNICATION.md
+  read <msgId|all> <agent> [note]      Confirm read on message(s) ("Roger that" receipt)
+  unread <agent>                       List unread messages addressed to an agent
   log --agent <agent> --action <act> --files <files> [--notes <notes>]
                                        Record an entry into ACTIVITY_LOG.md
 
@@ -112,6 +114,10 @@ Aliases:
   save [name]                          Alias for 'archive save'
   resume <name|index>                  Alias for 'archive resume'
   sessions                             Alias for 'archive list'
+  read <msgId|all> <agent> [note]      Alias for 'read' / 'ack' / 'roger'
+  ack <msgId|all> <agent> [note]       Alias for 'read'
+  roger <msgId|all> <agent> [note]     Alias for 'read'
+  unread <agent>                       List unread messages for an agent
   help                                 Show this help screen
 `);
 }
@@ -159,6 +165,7 @@ function cmdAssemble(agentName) {
 - **To:** \`@All\`
 - **Type:** \`[ASSEMBLE]\`
 - **Status:** \`[OPEN]\`
+- **Read By:** (none)
 - **Subject:** ${agent} Joined Workspace
 - **Body:**
   > ${agent} has been assembled into the workspace via \`/assemble\`.
@@ -181,11 +188,25 @@ function cmdAssemble(agentName) {
     console.log('\n' + readySection[0].trim());
   }
 
+  // Check for unread messages for this agent
+  const unread = getUnreadMessages(agent);
+  console.log(`\n📬 UNREAD MESSAGES FOR ${agent.toUpperCase()} (${unread.length}):`);
+  if (unread.length === 0) {
+    console.log('  ✨ All messages have been confirmed read (inbox up to date).');
+  } else {
+    for (const msg of unread) {
+      console.log(`  • ${msg.id} · ${msg.subject} (From: ${msg.from}, Date: ${msg.dateTime})`);
+    }
+    console.log(`\n  👉 Confirm read with: node scripts/hub.js read <MSG-ID> "${agent}"`);
+    console.log(`  👉 Or mark all read:  node scripts/hub.js read all "${agent}"`);
+  }
+
   console.log('\n' + '='.repeat(60));
   console.log(`💡 Next Steps for ${agent}:`);
   console.log(`   1. If user request needs tasks, break it down and add to TASKS.md`);
   console.log(`   2. Claim a task: node scripts/hub.js claim <taskId> "${agent}" "files..."`);
-  console.log(`   3. Check AGENT_COMMUNICATION.md for handoffs or messages`);
+  console.log(`   3. Confirm read on messages: node scripts/hub.js read all "${agent}"`);
+  console.log(`   4. Coordinate handoffs in AGENT_COMMUNICATION.md`);
   console.log('='.repeat(60));
 }
 
@@ -219,7 +240,7 @@ function cmdStatus() {
   // 4. Latest Messages
   const comm = readFileSafe(COMM_PATH);
   console.log('\n💬 RECENT AGENT THREADS:');
-  const msgMatches = comm.match(/### 💬 `MSG-\d+`[^\n]*\n(?:[^\n]*\n){1,8}/g);
+  const msgMatches = comm.match(/### 💬 `MSG-\d+`[^\n]*\n(?:[^\n]*\n){1,10}/g);
   if (msgMatches && msgMatches.length > 0) {
     const recent = msgMatches.slice(-2);
     recent.forEach((m) => console.log(m.trim() + '\n'));
@@ -362,6 +383,7 @@ function cmdMsg(flags) {
 - **To:** \`${to}\`
 - **Type:** \`[${type.toUpperCase()}]\`
 - **Status:** \`[OPEN]\`
+- **Read By:** (none)
 - **Subject:** ${subject}
 - **Body:**
   > ${body.replace(/\n/g, '\n  > ')}
@@ -387,6 +409,221 @@ function cmdLog(flags) {
 
   cmdLogInternal(agent, action, files, notes);
   console.log(`📝 Logged action into ${LOG_PATH}`);
+}
+
+// ============================================================
+// 💬 MESSAGE READING & ACKNOWLEDGEMENT ("ROGER THAT") FUNCTIONS
+// ============================================================
+
+function parseMessages(commContent) {
+  const messages = [];
+  const matches = commContent.match(/### 💬 `(MSG-\d+)`[\s\S]*?(?=\n### 💬 `MSG-|$)/g);
+  if (!matches) return messages;
+
+  for (const block of matches) {
+    const idMatch = block.match(/### 💬 `(MSG-\d+)`/);
+    if (!idMatch) continue;
+    const id = idMatch[1];
+    const dateMatch = block.match(/- \*\*Date & Time:\*\*\s*([^\n]+)/);
+    const fromMatch = block.match(/- \*\*From:\*\*\s*`?([^`\n]+)`?/);
+    const toMatch = block.match(/- \*\*To:\*\*\s*`?([^`\n]+)`?/);
+    const typeMatch = block.match(/- \*\*Type:\*\*\s*`?\[?([^\n`\]]+)\]?`?/);
+    const statusMatch = block.match(/- \*\*Status:\*\*\s*`?\[?([^\n`\]]+)\]?`?/);
+    const readByMatch = block.match(/- \*\*Read By:\*\*\s*([^\n]+)/);
+    const subjectMatch = block.match(/- \*\*Subject:\*\*\s*([^\n]+)/);
+
+    messages.push({
+      id,
+      fullBlock: block,
+      dateTime: dateMatch ? dateMatch[1].trim() : '',
+      from: fromMatch ? fromMatch[1].trim() : '',
+      to: toMatch ? toMatch[1].trim() : '',
+      type: typeMatch ? typeMatch[1].trim() : '',
+      status: statusMatch ? statusMatch[1].trim() : '',
+      readBy: readByMatch ? readByMatch[1].trim() : null,
+      subject: subjectMatch ? subjectMatch[1].trim() : '',
+    });
+  }
+  return messages;
+}
+
+function getUnreadMessages(agentFormatted) {
+  const comm = readFileSafe(COMM_PATH);
+  const messages = parseMessages(comm);
+  const unread = [];
+
+  const agentLower = (agentFormatted || '').toLowerCase();
+
+  for (const msg of messages) {
+    const fromLower = msg.from.toLowerCase();
+    const toLower = msg.to.toLowerCase();
+    const readByLower = (msg.readBy || '').toLowerCase();
+
+    // Skip self-authored messages
+    if (fromLower === agentLower) continue;
+
+    // Check if addressed to agent or to all
+    const addressedToAgent = toLower === agentLower || toLower === '@all' || toLower === 'all';
+    if (!addressedToAgent) continue;
+
+    // Check if not read yet
+    if (!readByLower.includes(agentLower)) {
+      unread.push(msg);
+    }
+  }
+
+  return unread;
+}
+
+function confirmMessageRead(comm, msgId, agentFormatted, note) {
+  const timestamp = getTimestamp();
+  const ackNote = note ? note.trim() : 'Roger that ✓';
+  const receipt = `\`${agentFormatted}\` (${timestamp} · "${ackNote}")`;
+
+  const msgRegex = new RegExp(`(### 💬 \`${msgId}\`[\\s\\S]*?)(?=\\n### 💬 \`MSG-|$)`);
+  const match = comm.match(msgRegex);
+  if (!match) {
+    return { success: false, reason: `Message ${msgId} not found` };
+  }
+
+  let block = match[0];
+
+  const readByRegex = /- \*\*Read By:\*\*\s*([^\n]*)/;
+  const readByMatch = block.match(readByRegex);
+
+  if (readByMatch) {
+    const existing = readByMatch[1].trim();
+    if (existing.toLowerCase().includes(agentFormatted.toLowerCase())) {
+      return { success: false, alreadyRead: true, msgId };
+    }
+    let newReadBy;
+    if (!existing || existing === '(none)') {
+      newReadBy = `- **Read By:** ${receipt}`;
+    } else {
+      newReadBy = `- **Read By:** ${existing}, ${receipt}`;
+    }
+    block = block.replace(readByRegex, newReadBy);
+  } else {
+    const statusRegex = /(- \*\*Status:\*\*[^\n]*\n)/;
+    if (block.match(statusRegex)) {
+      block = block.replace(statusRegex, `$1- **Read By:** ${receipt}\n`);
+    } else {
+      const subjRegex = /(- \*\*Subject:\*\*[^\n]*)/;
+      if (block.match(subjRegex)) {
+        block = block.replace(subjRegex, `- **Read By:** ${receipt}\n$1`);
+      } else {
+        block += `\n- **Read By:** ${receipt}\n`;
+      }
+    }
+  }
+
+  const updatedComm = comm.replace(match[0], block);
+  return { success: true, updatedComm, msgId, agent: agentFormatted, note: ackNote };
+}
+
+function cmdRead(targetArg, agentArg, noteArg) {
+  let target = targetArg;
+  let agent = agentArg;
+  let note = noteArg;
+
+  // Handle reversed arguments gracefully (e.g. read @Agent MSG-001)
+  if (target && target.startsWith('@') && agent && (agent.toUpperCase().startsWith('MSG-') || agent.toLowerCase() === 'all' || /^\d+$/.test(agent))) {
+    const tmp = target;
+    target = agent;
+    agent = tmp;
+  }
+
+  if (!target || !agent) {
+    console.error('Error: read requires <msgId|all> and <agentName>');
+    console.log('Usage: node scripts/hub.js read <MSG-ID|all> <agentName> ["Roger that!"]');
+    console.log('Example: node scripts/hub.js read MSG-008 "@Copilot" "Roger that!"');
+    process.exit(1);
+  }
+
+  const agentFormatted = agent.startsWith('@') ? agent : `@${agent}`;
+  let comm = readFileSafe(COMM_PATH);
+  if (!comm) {
+    console.error(`Error: Could not read ${COMM_PATH}`);
+    process.exit(1);
+  }
+
+  const isAll = target.toLowerCase() === 'all' || target === '--all';
+
+  if (isAll) {
+    const unread = getUnreadMessages(agentFormatted);
+    if (unread.length === 0) {
+      console.log(`✨ No unread messages to confirm for ${agentFormatted}.`);
+      return;
+    }
+
+    const confirmedIds = [];
+    for (const msg of unread) {
+      const res = confirmMessageRead(comm, msg.id, agentFormatted, note);
+      if (res.success) {
+        comm = res.updatedComm;
+        confirmedIds.push(msg.id);
+      }
+    }
+
+    if (confirmedIds.length > 0) {
+      fs.writeFileSync(COMM_PATH, comm, 'utf8');
+      const noteStr = note ? ` ("${note}")` : ' ("Roger that ✓")';
+      cmdLogInternal(agentFormatted, `Confirmed read on ${confirmedIds.length} message(s): ${confirmedIds.join(', ')}`, 'AGENT_COMMUNICATION.md', `Read receipts confirmed${noteStr}`);
+      console.log(`🫡 Confirmed read on ${confirmedIds.length} message(s) by ${agentFormatted}${noteStr}:`);
+      console.log(`   ${confirmedIds.join(', ')}`);
+    } else {
+      console.log(`No messages were updated.`);
+    }
+    return;
+  }
+
+  // Single message
+  let cleanId = target.replace(/[`\s]/g, '').toUpperCase();
+  if (/^\d+$/.test(cleanId)) {
+    cleanId = `MSG-${String(parseInt(cleanId, 10)).padStart(3, '0')}`;
+  }
+
+  const res = confirmMessageRead(comm, cleanId, agentFormatted, note);
+  if (res.alreadyRead) {
+    console.log(`ℹ️ Message ${cleanId} was already marked as read by ${agentFormatted}.`);
+    return;
+  }
+  if (!res.success) {
+    console.error(`Error: ${res.reason || `Message ${cleanId} not found in ${COMM_PATH}`}`);
+    process.exit(1);
+  }
+
+  fs.writeFileSync(COMM_PATH, res.updatedComm, 'utf8');
+  cmdLogInternal(agentFormatted, `Confirmed read ${cleanId} ("${res.note}")`, 'AGENT_COMMUNICATION.md', 'Read receipt confirmed (Roger that)');
+  console.log(`🫡 Confirmed read on ${cleanId} by ${agentFormatted}: "${res.note}"`);
+}
+
+function cmdUnread(agentName) {
+  if (!agentName) {
+    console.error('Error: unread requires <agentName> (e.g. node scripts/hub.js unread "@Copilot")');
+    process.exit(1);
+  }
+  const agentFormatted = agentName.startsWith('@') ? agentName : `@${agentName}`;
+  const unread = getUnreadMessages(agentFormatted);
+
+  console.log('='.repeat(60));
+  console.log(`📬 UNREAD MESSAGES FOR ${agentFormatted.toUpperCase()} (${unread.length})`);
+  console.log('='.repeat(60));
+
+  if (unread.length === 0) {
+    console.log(`\n✨ All caught up! No unread messages for ${agentFormatted}.\n`);
+  } else {
+    console.log('');
+    for (const msg of unread) {
+      console.log(`• ${msg.id} · ${msg.subject}`);
+      console.log(`  From: ${msg.from}  |  Date: ${msg.dateTime}  |  Type: [${msg.type}]`);
+    }
+    console.log('\n👉 To confirm read (Roger that):');
+    console.log(`   node scripts/hub.js read <MSG-ID> "${agentFormatted}" ["custom note"]`);
+    console.log(`   # Or mark all as read:`);
+    console.log(`   node scripts/hub.js read all "${agentFormatted}"\n`);
+  }
+  console.log('='.repeat(60));
 }
 
 // ============================================================
@@ -800,6 +1037,7 @@ function cmdArchiveResume(targetArg, flags = {}) {
 - **To:** \`@All\`
 - **Type:** \`[ANNOUNCEMENT]\`
 - **Status:** \`[OPEN]\`
+- **Read By:** (none)
 - **Subject:** Session "${sessionTitle}" Resumed
 - **Body:**
   > Archived session \`${selectedFolder}\` has been restored to the workspace.
@@ -875,6 +1113,15 @@ function main() {
       break;
     case 'msg':
       cmdMsg(flags);
+      break;
+    case 'read':
+    case 'ack':
+    case 'roger':
+    case 'confirm':
+      cmdRead(positional[1], positional[2], positional.slice(3).join(' ') || flags.note);
+      break;
+    case 'unread':
+      cmdUnread(positional[1]);
       break;
     case 'log':
       cmdLog(flags);
