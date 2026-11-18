@@ -11,8 +11,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
-const { execFileSync } = require('child_process');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 let roleDefs = null;
@@ -310,271 +308,43 @@ function resolveParticipantIdentity(rawInput, presenceOverride = null) {
 const CREDIT_ERROR_REGEX = /\b(quota|credit|credits|insufficient_quota|rate_limit|rate limit|429|402|payment required|billing|exhausted|exceeded.*limit|token limit reached|out of credits)\b/i;
 
 /**
- * Passively probes Antigravity runtime via ~/.gemini/antigravity/brain/* transcript logs
- * without requiring the agent to manually check in.
+ * Collects live workspace-local agent activity strictly from hub files inside ROOT_DIR
+ * (AGENT_PRESENCE.json, TASKS.md, AGENT_COMMUNICATION.md, VIBE_FEED.json).
  */
-function probeAntigravityPassive() {
-  const home = os.homedir();
-  const brainDir = path.join(home, '.gemini', 'antigravity', 'brain');
-  if (!fs.existsSync(brainDir)) return null;
-
-  try {
-    const dirs = fs.readdirSync(brainDir);
-    let latestFile = null;
-    let latestMtime = 0;
-
-    for (const d of dirs) {
-      const p = path.join(brainDir, d, '.system_generated', 'logs', 'transcript.jsonl');
-      try {
-        if (fs.existsSync(p)) {
-          const st = fs.statSync(p);
-          if (st.mtimeMs > latestMtime) {
-            latestMtime = st.mtimeMs;
-            latestFile = p;
-          }
-        }
-      } catch {}
-    }
-
-    if (!latestFile) return null;
-    const tail = readFileTailFast(latestFile, 32768);
-    if (!tail) return null;
-
-    const lines = tail.text.trim().split('\n').filter(Boolean);
-    let lastObj = null;
-    for (let i = lines.length - 1; i >= 0; i--) {
-      try {
-        lastObj = JSON.parse(lines[i]);
-        break;
-      } catch {}
-    }
-
-    const ageSec = Math.max(0, Math.floor((Date.now() - tail.mtimeMs) / 1000));
-    const tailSample = lines.slice(-3).join(' ');
-
-    if (lastObj && lastObj.status === 'ERROR' && CREDIT_ERROR_REGEX.test(tailSample)) {
-      return {
-        detected: true,
-        status: 'CREDIT_EXHAUSTED',
-        isOnline: false,
-        lastActiveMs: tail.mtimeMs,
-        detail: 'Passive telemetry: Quota/credit error in Antigravity transcript'
-      };
-    }
-
-    // If modified within last 45s or step is actively executing
-    if (ageSec <= 45 || (lastObj && (lastObj.status === 'RUNNING' || lastObj.type === 'USER_INPUT'))) {
-      return {
-        detected: true,
-        status: 'RUNNING',
-        isOnline: true,
-        lastActiveMs: tail.mtimeMs,
-        detail: `Active turn (${lastObj ? lastObj.type : 'executing'})`
-      };
-    }
-
-    // If active within threshold window
-    if (ageSec <= DEFAULT_ONLINE_TIMEOUT_MIN * 60) {
-      return {
-        detected: true,
-        status: 'IDLE',
-        isOnline: true,
-        lastActiveMs: tail.mtimeMs,
-        detail: 'Session open & ready (turn completed)'
-      };
-    }
-
-    return {
-      detected: true,
-      status: 'OFFLINE',
-      isOnline: false,
-      lastActiveMs: tail.mtimeMs,
-      detail: `Last transcript activity ${formatRelativeTime(new Date(tail.mtimeMs).toISOString())}`
-    };
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Passively probes GitHub Copilot runtime via %APPDATA%/Code/logs/* /agenthost.log
- * without requiring Copilot to manually check in.
- */
-function probeCopilotPassive() {
-  const appData = process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming');
-  const logsRoot = path.join(appData, 'Code', 'logs');
-  if (!fs.existsSync(logsRoot)) return null;
-
-  try {
-    const dirs = fs.readdirSync(logsRoot);
-    let latestLog = null;
-    let latestMtime = 0;
-
-    for (const d of dirs) {
-      const p = path.join(logsRoot, d, 'agenthost.log');
-      try {
-        if (fs.existsSync(p)) {
-          const st = fs.statSync(p);
-          if (st.mtimeMs > latestMtime) {
-            latestMtime = st.mtimeMs;
-            latestLog = p;
-          }
-        }
-      } catch {}
-    }
-
-    if (!latestLog) return null;
-    const tail = readFileTailFast(latestLog, 65536);
-    if (!tail) return null;
-
-    const rawLines = tail.text.split('\n');
-    const events = [];
-
-    for (const line of rawLines) {
-      if (!line.includes('[Copilot') && !line.includes('[AgentHostTurnTiming]')) continue;
-      if (
-        line.includes('hidden customization policy') ||
-        line.includes('Managed settings resolved') ||
-        line.includes('MCP server') ||
-        line.includes('Syncing permission mode: source=config-change') ||
-        line.includes('Discarded pre-warmed session')
-      ) {
-        continue;
-      }
-      events.push(line.trim());
-    }
-
-    if (events.length === 0) return null;
-    const lastEvent = events[events.length - 1];
-    const tsMatch = lastEvent.match(/^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}(?:\.\d+)?)/);
-    const eventTimeMs = tsMatch ? new Date(tsMatch[1].replace(' ', 'T')).getTime() : tail.mtimeMs;
-    const ageSec = Math.max(0, Math.floor((Date.now() - eventTimeMs) / 1000));
-
-    // Check recent errors for credit/quota exhaustion
-    const recentSlice = events.slice(-6).join('\n');
-    if (recentSlice.includes('[error]') && CREDIT_ERROR_REGEX.test(recentSlice)) {
-      return {
-        detected: true,
-        status: 'CREDIT_EXHAUSTED',
-        isOnline: false,
-        lastActiveMs: eventTimeMs,
-        detail: 'Passive telemetry: Quota/rate-limit error in Copilot agenthost.log'
-      };
-    }
-
-    if (lastEvent.includes('Requesting confirmation for tool call')) {
-      return {
-        detected: true,
-        status: 'WAITING',
-        isOnline: true,
-        lastActiveMs: eventTimeMs,
-        detail: 'Waiting for tool confirmation in VS Code'
-      };
-    }
-
-    const toolStartMatch = lastEvent.match(/Tool started:\s*([^\s]+)/);
-    if (
-      toolStartMatch ||
-      lastEvent.includes('session.send() returned') ||
-      lastEvent.includes('Full message received: 0 chars') ||
-      (ageSec <= 30 && !lastEvent.includes('Session idle') && !lastEvent.includes('SDK session disconnect'))
-    ) {
-      const toolName = toolStartMatch ? toolStartMatch[1] : 'turn';
-      return {
-        detected: true,
-        status: 'RUNNING',
-        isOnline: true,
-        lastActiveMs: eventTimeMs,
-        detail: `Executing in Copilot (${toolName})`
-      };
-    }
-
-    if (lastEvent.includes('Session idle') || lastEvent.includes('Full message received:')) {
-      const isRecent = ageSec <= DEFAULT_ONLINE_TIMEOUT_MIN * 60;
-      return {
-        detected: true,
-        status: isRecent ? 'IDLE' : 'OFFLINE',
-        isOnline: isRecent,
-        lastActiveMs: eventTimeMs,
-        detail: isRecent ? 'Copilot session idle & ready' : `Copilot idle since ${formatRelativeTime(new Date(eventTimeMs).toISOString())}`
-      };
-    }
-
-    if (lastEvent.includes('SDK session disconnect')) {
-      return {
-        detected: true,
-        status: 'OFFLINE',
-        isOnline: false,
-        lastActiveMs: eventTimeMs,
-        detail: 'Copilot SDK session disconnected'
-      };
-    }
-
-    return {
-      detected: true,
-      status: ageSec <= DEFAULT_ONLINE_TIMEOUT_MIN * 60 ? 'IDLE' : 'OFFLINE',
-      isOnline: ageSec <= DEFAULT_ONLINE_TIMEOUT_MIN * 60,
-      lastActiveMs: eventTimeMs,
-      detail: 'Copilot session detected'
-    };
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Passively probes Claude Code via ~/.claude/projects transcripts if present.
- */
-function probeClaudePassive() {
-  const claudeDir = path.join(os.homedir(), '.claude', 'projects');
-  if (!fs.existsSync(claudeDir)) return null;
-  try {
-    let latestFile = null;
-    let latestMtime = 0;
-    for (const sub of fs.readdirSync(claudeDir)) {
-      const subPath = path.join(claudeDir, sub);
-      if (!fs.statSync(subPath).isDirectory()) continue;
-      for (const f of fs.readdirSync(subPath)) {
-        if (!f.endsWith('.jsonl')) continue;
-        const fp = path.join(subPath, f);
-        const st = fs.statSync(fp);
-        if (st.mtimeMs > latestMtime) {
-          latestMtime = st.mtimeMs;
-          latestFile = fp;
-        }
-      }
-    }
-    if (!latestFile) return null;
-    const tail = readFileTailFast(latestFile, 16384);
-    if (!tail) return null;
-    const ageSec = Math.max(0, Math.floor((Date.now() - tail.mtimeMs) / 1000));
-    if (CREDIT_ERROR_REGEX.test(tail.text.slice(-2000))) {
-      return { detected: true, status: 'CREDIT_EXHAUSTED', isOnline: false, lastActiveMs: tail.mtimeMs, detail: 'Credit/quota limit detected in Claude log' };
-    }
-    if (ageSec <= 40) {
-      return { detected: true, status: 'RUNNING', isOnline: true, lastActiveMs: tail.mtimeMs, detail: 'Active Claude turn' };
-    }
-    if (ageSec <= DEFAULT_ONLINE_TIMEOUT_MIN * 60) {
-      return { detected: true, status: 'IDLE', isOnline: true, lastActiveMs: tail.mtimeMs, detail: 'Claude session idle' };
-    }
-    return { detected: true, status: 'OFFLINE', isOnline: false, lastActiveMs: tail.mtimeMs, detail: 'Claude session inactive' };
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Passively probes all supported agents on the host machine in <5ms.
- */
-function probeAllPassiveTelemetry() {
+function getWorkspaceHubAgentActivity() {
   const results = {};
-  const agy = probeAntigravityPassive();
-  if (agy) results['@Antigravity'] = agy;
-  const cop = probeCopilotPassive();
-  if (cop) results['@Copilot'] = cop;
-  const cla = probeClaudePassive();
-  if (cla) results['@Claude'] = cla;
+  const presence = loadPresence();
+  const agents = presence && presence.agents && typeof presence.agents === 'object' ? presence.agents : {};
+  const now = Date.now();
+
+  for (const [tag, rec] of Object.entries(agents)) {
+    if (!rec || typeof rec !== 'object') continue;
+    const baseTag = getBaseProviderTag(tag);
+    const seenMs = rec.lastSeenIso ? new Date(rec.lastSeenIso).getTime() : 0;
+    const ageSec = seenMs > 0 ? Math.max(0, Math.floor((now - seenMs) / 1000)) : Infinity;
+    const rawStatus = String(rec.status || 'OFFLINE').toUpperCase();
+    const isOnline =
+      rawStatus === 'CREDIT_EXHAUSTED'
+        ? false
+        : rawStatus !== 'OFFLINE' && (Boolean(rec.assembled) || ageSec <= DEFAULT_ONLINE_TIMEOUT_MIN * 60);
+
+    const entry = {
+      detected: Boolean(rec.assembled || seenMs > 0),
+      status: isOnline ? rawStatus : rawStatus === 'CREDIT_EXHAUSTED' ? 'CREDIT_EXHAUSTED' : 'OFFLINE',
+      isOnline,
+      lastActiveMs: seenMs || 0,
+      detail: rec.activity || `Workspace hub status (${rawStatus})`,
+    };
+    results[tag] = entry;
+    if (!results[baseTag]) {
+      results[baseTag] = entry;
+    }
+  }
   return results;
+}
+
+function probeAllPassiveTelemetry() {
+  return getWorkspaceHubAgentActivity();
 }
 
 /**
@@ -3330,13 +3100,6 @@ function cmdCancel(flags = {}) {
   const nowIso = new Date().toISOString();
   const reason = String(flags.reason || 'Cancelled by user from Vibe Coding tab').trim();
   const presence = loadPresence();
-  const pidsToKill = Array.isArray(presence.cliPids) ? [...presence.cliPids] : [];
-  for (const pid of pidsToKill) {
-    if (!pid || typeof pid !== 'number') continue;
-    try {
-      process.kill(pid, 'SIGTERM');
-    } catch {}
-  }
   presence.cliPids = [];
   presence.sessionCancelled = true;
   presence.cancelledAtIso = nowIso;

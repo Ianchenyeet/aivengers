@@ -4,7 +4,7 @@ const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { execFile, spawn } = require('child_process');
+const { execFile } = require('child_process');
 const roleDefs = require('./src/roles/roleDefinitions');
 
 const VIEW_ID = 'aivengers.panel';
@@ -670,24 +670,6 @@ function interpolateTemplate(template, vars) {
     .trim();
 }
 
-function resolveAgyCliPath() {
-  const candidates = [
-    process.env.ANTIGRAVITY_AGENTAPI_EXE,
-    path.join(
-      process.env.USERPROFILE || process.env.HOME || '',
-      '.gemini',
-      'bin',
-      process.platform === 'win32' ? 'agy.exe' : 'agy'
-    ),
-  ].filter(Boolean);
-  for (const c of candidates) {
-    try {
-      if (fs.existsSync(c)) return c;
-    } catch {}
-  }
-  return null;
-}
-
 function buildKickoffPrompt({
   agent,
   model,
@@ -924,67 +906,8 @@ async function launchSingleAgent(
     }
   };
 
-  const spawnAgyCli = () => {
-    const exe = resolveAgyCliPath();
-    if (!exe) return false;
-    const args = ['--mode', 'auto'];
-    if (!shouldStartNewChat && providerInstanceIndex === 0) {
-      args.push('-c');
-    }
-    if (model && model.id && model.id !== 'auto') {
-      args.push('--model', model.id);
-    }
-    if (Array.isArray(attachments)) {
-      for (const att of attachments) {
-        if (att && att.path && att.isDirectory) {
-          args.push('--add-dir', att.path);
-        }
-      }
-    }
-    args.push('-p', kickoff);
-    try {
-      const child = spawn(exe, args, {
-        cwd: hubDir,
-        windowsHide: true,
-        stdio: 'ignore',
-      });
-      if (child.pid) {
-        try {
-          const presPath = path.join(hubDir, 'AGENT_PRESENCE.json');
-          const pres = readJsonSafe(presPath, null);
-          if (pres && typeof pres === 'object') {
-            pres.cliPids = Array.from(new Set([...(Array.isArray(pres.cliPids) ? pres.cliPids : []), child.pid]));
-            fs.writeFileSync(presPath, JSON.stringify(pres, null, 2) + '\n', 'utf8');
-          }
-        } catch {}
-      }
-      if (providerRef && providerRef.activeChildProcesses) {
-        providerRef.activeChildProcesses.add(child);
-        const cleanup = () => providerRef.activeChildProcesses.delete(child);
-        child.once('exit', cleanup);
-        child.once('error', cleanup);
-      }
-      child.unref && child.unref();
-      recordLaunched();
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   try {
     if (agent.launchType === 'antigravity') {
-      const launchMode = settings?.antigravityLaunchMode || 'ui_with_cli_fallback';
-      if (launchMode === 'cli_only' || (providerInstanceIndex > 0 && launchMode !== 'ui_only')) {
-        const started = spawnAgyCli();
-        if (started || launchMode === 'cli_only') {
-          return {
-            ...baseResultMeta,
-            status: started ? 'cli_launched' : 'inbox_ready',
-          };
-        }
-      }
-
       const cmds = await vscode.commands.getCommands(true);
       if (cmds.includes('antigravity.toggleChatFocus')) {
         await withTimeout(vscode.commands.executeCommand('antigravity.toggleChatFocus'), 2500, null);
@@ -1016,10 +939,6 @@ async function launchSingleAgent(
           ...baseResultMeta,
           status: 'auto_submitted',
         };
-      }
-
-      if (launchMode === 'ui_with_cli_fallback' && spawnAgyCli()) {
-        return { ...baseResultMeta, status: 'cli_launched' };
       }
 
       if (cmds.includes('antigravity.panel.focus')) {
@@ -1193,11 +1112,6 @@ class VibeCodingViewProvider {
   killActiveChildProcesses() {
     for (const child of this.activeChildProcesses) {
       try {
-        if (child.pid) {
-          try {
-            process.kill(child.pid, 'SIGTERM');
-          } catch {}
-        }
         if (typeof child.kill === 'function') {
           child.kill('SIGTERM');
         }
