@@ -1,0 +1,47 @@
+{
+  "id": "session-2026-11-15_09-29-24",
+  "name": "test-collaboration-please-comply-and-report-you",
+  "title": "test collaboration, please comply and report you",
+  "folder": "2026-11-15_09-29-24_new-collaboration",
+  "updatedAt": "2026-11-18 12:36",
+  "updatedAtIso": "2026-11-18T04:36:29.527Z",
+  "archivedAt": "2026-11-18 12:36",
+  "mainAgent": "@Copilot",
+  "participants": [
+    "@Copilot",
+    "@Antigravity"
+  ],
+  "agentModels": {
+    "@Antigravity": "Gemini 4 Hydrogen (Low)"
+  },
+  "savedSlots": [
+    {
+      "agentKey": "@copilot",
+      "modelId": "auto",
+      "modelLabel": "Auto (Copilot Default)"
+    },
+    {
+      "agentKey": "@antigravity",
+      "modelId": "gemini-4-hydrogen-low",
+      "modelLabel": "Gemini 4 Hydrogen (Low)"
+    }
+  ],
+  "sessionCancelled": true,
+  "summary": "**Main Agent (Slot 1):** @Copilot **Participating Agents:** @Copilot (Main), @Antigravity (Model: Gemini 4 Hydrogen (Low)) **Agent Models:** {\"@Antigravity\":\"Ge",
+  "feedCount": 11,
+  "stats": {
+    "tasksCompleted": 2,
+    "tasksInProgress": 1,
+    "tasksReady": 1,
+    "messages": 13
+  },
+  "files": [
+    "USER_INBOX.md",
+    "TASKS.md",
+    "AGENT_COMMUNICATION.md",
+    "ACTIVITY_LOG.md",
+    "PROJECT_STATE.md",
+    "AGENT_PRESENCE.json",
+    "VIBE_FEED.json"
+  ]
+}

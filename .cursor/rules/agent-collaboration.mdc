@@ -6,12 +6,13 @@ alwaysApply: true
 
 # Cursor Multi-Agent Collaboration Rule
 
+- **Portability Rule:** Read project files outside `vibe coding tools` when assembled, but never create dependencies from outside files into `vibe coding tools` or hardcode outside dependencies inside `vibe coding tools`.
 - **Default:** If the user gives a normal prompt without `/assemble`, answer and code normally.
-- **Assembly (`/assemble`):** Only when the user inputs `/assemble` (or asks to assemble in the multi-agent workspace):
-  1. Read `USER_INBOX.md` (which has the user's casual, plain-text request).
-  2. Run `node scripts/hub.js assemble "@Cursor"` to announce your assembly.
-  3. In `TASKS.md`, check active tasks and respect `Locked Files`.
-  4. Claim a task, lock your target files, and coordinate handoffs in `AGENT_COMMUNICATION.md`.
-
-  5. Use `discord-agent-bridge` MCP tools (`discord_ask_poll`, `discord_ask_question`) when asking questions or presenting choices to the user.
-  6. Check unread messages on assembly with `node scripts/hub.js unread "@Cursor"` and confirm read with `node scripts/hub.js read all "@Cursor"`.
+- **Assembly (`/assemble`):** When the user inputs `/assemble`:
+  1. Read `USER_INBOX.md` for goals, roles, `Main` agent, and expected participants; run `node scripts/hub.js assemble "@Cursor"`.
+  2. Read `.cursorrules`, `TASKS.md`, `AGENT_COMMUNICATION.md` (`node scripts/hub.js read all "@Cursor"`), and read relevant project files outside `vibe coding tools`.
+  3. Run `node scripts/hub.js health` / `node scripts/hub.js wait-team --timeout 180` to wait for all participants. Draft plans inside `vibe coding tools` while waiting, **without editing or deploying any files outside `vibe coding tools`**. If waiting times out, poll the user in the VS Code AIvengers tab (`node scripts/hub.js poll`).
+  4. Review draft plans together once all teammates join, contribute ideas, and let `Main` submit the agreed plan in the VS Code AIvengers tab (`node scripts/hub.js report --type checkpoint` + `node scripts/hub.js poll`, and `node scripts/hub.js plan review` -> `approve`).
+  5. After user approval, claim tasks (`node scripts/hub.js claim TASK-xxx "@Cursor" "file"`), respect file locks, and check `AGENT_COMMUNICATION.md` periodically. If assigned as `Main`, act as Manager (less coding, more alignment & verification).
+  6. Monitor `node scripts/hub.js health` for passive `CREDIT_EXHAUSTED` / `OFFLINE` alerts; step up as `Substitute Main` and poll the user in the VS Code AIvengers tab (`node scripts/hub.js poll`) if `Main` disconnects or runs out of credits.
+  7. Stay `IDLE` and help teammates if you finish early. Only `Main` (or `Substitute Main`) sends the final `final_summary` report (`node scripts/hub.js report --type final_summary ...`) and posts `[SIGN-OFF]` in `AGENT_COMMUNICATION.md` before everyone goes `OFFLINE`.

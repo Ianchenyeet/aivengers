@@ -1,15 +1,21 @@
-# Cursor Multi-Agent Collaboration Rules
+# Cursor Multi-Agent Collaboration Rules (`.cursorrules`)
 
-## Default Mode
-Normal prompts are handled as standard coding queries. Do not read `USER_INBOX.md` or touch `TASKS.md` unless `/assemble` is explicitly requested.
+You are operating inside the **`vibe coding tools`** drop-in multi-agent collaboration workspace.
 
-## Workspace Assembly: `/assemble`
+## 📦 Drop-In Portability & Zero Cross-Dependency Rule
+- Read project files **outside** `vibe coding tools` to understand and implement the user's request.
+- **Zero Cross-Dependencies:** Never make any file outside `vibe coding tools` depend on anything inside `vibe coding tools`, and never hardcode outside file dependencies inside `vibe coding tools`.
+
+## ⚡ Default Mode
+Normal prompts without `/assemble` are handled as standard single-agent coding queries. Do not read `USER_INBOX.md` or modify `TASKS.md` unless `/assemble` is explicitly invoked.
+
+## 🚀 Workspace Assembly: `/assemble` (8-Step Team Workflow)
 When the user types `/assemble`:
-1. Register in the workspace by running `node scripts/hub.js assemble "@Cursor"`.
-2. Read the user's casual request in `USER_INBOX.md`.
-3. Check `TASKS.md` for active locks (never edit locked files).
-4. Claim an available task in `TASKS.md` with `@Cursor` and list your locked files.
-5. Coordinate with `@Antigravity` and `@Copilot` using `AGENT_COMMUNICATION.md`.
-
-6. If you need user input or decisions, use the Discord bridge (`discord_ask_poll`, `discord_ask_question`) identifying yourself as `@Cursor`.
-7. Confirm read on messages using `node scripts/hub.js read all "@Cursor"` or `node scripts/hub.js read <msgId> "@Cursor"`.
+1. **Read Inbox & Assemble:** Read `USER_INBOX.md` (for prompt, roles, `Main` designation, attachments, and participants — when `Message 1`, `Message 2`, ... exist, work on `LATEST`) and run `node scripts/hub.js assemble "@Cursor"`.
+2. **Gather Context:** Read `.cursorrules`, `TASKS.md`, `AGENT_COMMUNICATION.md`, confirm unread messages (`node scripts/hub.js read all "@Cursor"`), and inspect project files outside `vibe coding tools` (read-only during planning).
+3. **Wait for Team (No Outside Edits While Waiting!):** Run `node scripts/hub.js health` or `node scripts/hub.js wait-team --timeout 180`. Discuss and draft plans inside `vibe coding tools` while waiting, **without editing or deploying any files outside `vibe coding tools`**. If waiting times out, poll the user in the **VS Code AIvengers tab** (`node scripts/hub.js poll`) to ask whether to start without missing teammates.
+4. **Team Plan:** Review any draft plan made while waiting, offer suggestions, and finalize the plan together with all assembled agents.
+5. **User Approval Gate:** `Main` (chosen in Slot 1 of the AIvengers tab or specified in `USER_INBOX.md`) submits the plan to the VS Code AIvengers tab for approval via a checkpoint report + interactive poll (`node scripts/hub.js poll`, which unlocks execution on approval) and marks `node scripts/hub.js plan review`. Wait for approval before editing files outside `vibe coding tools`.
+6. **Execute & Coordinate:** Claim tasks (`node scripts/hub.js claim TASK-xxx "@Cursor" "file"`), respect file locks, and never lock hub meta-files (`TASKS.md`, `AGENT_COMMUNICATION.md`, `ACTIVITY_LOG.md`, `VIBE_FEED.json`). If designated as `Main`, act as **Manager** (less code-writing work, keep teammates aligned, verify quality).
+7. **Credit Exhaustion / Offline Failover:** Run `node scripts/hub.js health` to passively detect if any peer is `CREDIT_EXHAUSTED` or `OFFLINE`. If `Main` goes offline/runs out of credits and you are promoted to **`Substitute Main`**, notify the user via `node scripts/hub.js poll --agent "@Cursor (Substitute Main)"`.
+8. **Standby & Sign-Off (Signal-Only Feed):** Only reports, questions, and polls appear in the VS Code AIvengers tab (`VIBE_FEED.json`), not casual chatter/thanks. Post `milestone` reports via `node scripts/hub.js report`. When finished early, stay `IDLE` and offer help to teammates in `AGENT_COMMUNICATION.md`. **Only `Main` (or `Substitute Main`)** sends the `final_summary` report AND posts a **`[SIGN-OFF]`** message to `@All` in `AGENT_COMMUNICATION.md` before anyone goes `OFFLINE`.

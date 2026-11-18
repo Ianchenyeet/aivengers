@@ -1,0 +1,64 @@
+{
+  "sessionId": "session-2026-11-15_09-29-24",
+  "sessionFolder": "2026-11-15_09-29-24_new-collaboration",
+  "sessionTitle": "test collaboration, please comply and report you",
+  "dispatchedAtIso": "2026-11-16T02:02:42.721Z",
+  "sessionCancelled": true,
+  "cancelledAtIso": "2026-11-16T02:03:12.529Z",
+  "mainAgent": "@Copilot",
+  "expectedParticipants": [
+    "@Copilot",
+    "@Antigravity"
+  ],
+  "agentModels": {
+    "@Antigravity": "Gemini 4 Hydrogen (Low)"
+  },
+  "savedSlots": [
+    {
+      "agentKey": "@copilot",
+      "modelId": "auto",
+      "modelLabel": "Auto (Copilot Default)"
+    },
+    {
+      "agentKey": "@antigravity",
+      "modelId": "gemini-4-hydrogen-low",
+      "modelLabel": "Gemini 4 Hydrogen (Low)"
+    }
+  ],
+  "plan": {
+    "status": "NONE",
+    "summary": "",
+    "reviewedBy": [],
+    "approvedByUser": false,
+    "updatedAt": "2026-11-16 10:02"
+  },
+  "agents": {
+    "@Antigravity": {
+      "status": "OFFLINE",
+      "assembled": false,
+      "currentTask": null,
+      "activity": "Session cancelled by user",
+      "joinedAt": "2026-11-15 09:32",
+      "pid": 19100,
+      "lastSeen": "2026-11-16 10:02",
+      "lastSeenIso": "2026-11-16T02:02:59.853Z"
+    },
+    "@Copilot": {
+      "status": "OFFLINE",
+      "assembled": false,
+      "currentTask": null,
+      "activity": "Session cancelled by user",
+      "joinedAt": "2026-11-15 09:33",
+      "pid": 13912,
+      "lastSeen": "2026-11-15 09:36",
+      "lastSeenIso": "2026-11-15T01:36:06.785Z"
+    }
+  },
+  "updatedAt": "2026-11-18 12:36",
+  "sessionCompleted": false,
+  "completedAtIso": null,
+  "latestMessageNumber": 0,
+  "sessionMessages": [],
+  "cliPids": [],
+  "slotMeta": {}
+}

@@ -1,16 +1,17 @@
 ---
 name: assemble
-description: "Assemble into the multi-agent workspace, read USER_INBOX.md, and coordinate with peer agents."
+description: "Assemble into the multi-agent workspace, read USER_INBOX.md, wait for all teammates, co-author the plan for VS Code AIvengers tab approval, and execute tasks safely."
+argument-hint: Optional message or notes
 disable-model-invocation: true
 ---
 You are now assembled into the Multi-Agent Workspace (`vibe coding tools`).
 
-Follow this workflow:
-1. Run `node scripts/hub.js assemble "@Copilot"` to register your assembly in the workspace.
-2. Read `USER_INBOX.md` to see what the user asked for.
-3. Review `TASKS.md` to see current tasks and locked files.
-4. Claim an available task in `TASKS.md` or decompose the user's request.
-5. Work on the task, respecting locks held by other agents.
-6. Post any handoffs or updates to `@Antigravity` or `@All` in `AGENT_COMMUNICATION.md`.
-7. **User Questions & Polls:** Whenever you need user feedback, clarification, or design choices, use the `discord-agent-bridge` MCP tools (`discord_ask_poll` for polls or `discord_ask_question` for open questions) identifying yourself as `agent_name: "GitHub Copilot"`.
-8. **Confirm Read (Roger That):** Check unread messages with `node scripts/hub.js unread "@Copilot"` and confirm read with `node scripts/hub.js read all "@Copilot"` (or `node scripts/hub.js read <msgId> "@Copilot" "Roger that!"`).
+Follow the **8-Step Default Team Workflow** (all reports, questions, and polls surface directly in the VS Code **AIvengers** tab via `node scripts/hub.js report|ask|poll`; casual chatter/thanks are omitted from the tab):
+1. **Read `USER_INBOX.md` & Assemble:** Locate the `vibe coding tools` directory at the workspace root or in a subfolder. Read `USER_INBOX.md` for user goals, roles, `Main` designation (chosen in Slot 1 of the AIvengers tab or specified in `USER_INBOX.md`), any attached files/folders, and expected participants (when multiple prompts exist `Message 1`, `Message 2`, ..., always work on `LATEST`). Run `node scripts/hub.js assemble "@Copilot"` from that directory; if it is nested, use `node "vibe coding tools/scripts/hub.js" assemble "@Copilot"`.
+2. **Gather Context:** Read `.github/copilot-instructions.md`, `TASKS.md`, `AGENT_COMMUNICATION.md` (`node scripts/hub.js read all "@Copilot"`), and inspect relevant project files **outside** `vibe coding tools` (never make outside files depend on `vibe coding tools` or vice versa).
+3. **Wait for Team (No Outside Edits While Waiting!):** Run `node scripts/hub.js health` or `node scripts/hub.js wait-team --timeout 180`. While waiting for teammates, you may discuss and draft plans inside `vibe coding tools`, **without editing or deploying any files outside `vibe coding tools`**. If waiting times out, poll the user via `node scripts/hub.js poll --agent "@Copilot"` to ask whether to start without missing teammates.
+4. **Co-Author Team Plan:** Review any draft plan in `TASKS.md` / `AGENT_COMMUNICATION.md`, offer improvements, and finalize the plan together once all participants join.
+5. **User Plan Approval Gate:** `Main` submits the agreed plan to the AIvengers tab (`node scripts/hub.js plan review` + checkpoint report + interactive poll; voting approve on the poll unlocks execution). Wait for approval before editing any project files outside `vibe coding tools`.
+6. **Execute & Coordinate:** Claim tasks (`node scripts/hub.js claim TASK-xxx "@Copilot" "file"`), respect file locks, and never lock shared hub files (`TASKS.md`, `AGENT_COMMUNICATION.md`, `ACTIVITY_LOG.md`, `VIBE_FEED.json`). If assigned as `Main`, act as **Manager** (take less writing work, keep teammates aligned, verify quality).
+7. **Passive Credit/Offline Failover:** Periodically run `node scripts/hub.js health`. If `Main` runs out of credits (`CREDIT_EXHAUSTED`) or goes `OFFLINE` and you are promoted to **`Substitute Main`**, immediately call `node scripts/hub.js poll --agent "@Copilot (Substitute Main)"` to notify the user and ask how to proceed.
+8. **Standby Helping & Sign-Off:** Send milestone updates via `node scripts/hub.js report --agent "@Copilot" --type milestone ...`. If you finish early, stay `IDLE` and ask teammates in `AGENT_COMMUNICATION.md` if they need help. **Only `Main` (or `Substitute Main`)** sends the `final_summary` report AND posts a **`[SIGN-OFF]`** message to `@All` in `AGENT_COMMUNICATION.md` so teammates never remain waiting before anyone goes `OFFLINE`.

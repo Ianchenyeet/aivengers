@@ -1,0 +1,22 @@
+{
+  "updatedAt": "2026-11-16 10:00",
+  "onlineTimeoutMinutes": 15,
+  "mainAgent": null,
+  "expectedParticipants": [],
+  "agentModels": {},
+  "plan": {
+    "status": "NONE",
+    "summary": "",
+    "reviewedBy": [],
+    "approvedByUser": false,
+    "updatedAt": null
+  },
+  "agents": {},
+  "sessionId": "session-2026-11-16_10-00-13",
+  "sessionTitle": "Collaboration Session",
+  "sessionFolder": "2026-11-15_00-16-00_collaboration-session",
+  "dispatchedAtIso": null,
+  "sessionCancelled": false,
+  "cancelledAtIso": null,
+  "savedSlots": null
+}

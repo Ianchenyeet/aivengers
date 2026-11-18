@@ -20,6 +20,7 @@
 vibe coding tools/
 ├── USER_INBOX.md           # User requests, answers, and guidelines (Read first!)
 ├── TASKS.md                # Task planning board, claims, and file locks
+├── AGENT_PRESENCE.json     # Real-time peer presence & liveness state
 ├── AGENT_COMMUNICATION.md  # Inter-agent chat, handoffs, and questions
 ├── DECISIONS.md            # Architecture Decision Records (ADRs)
 ├── ACTIVITY_LOG.md         # Chronological audit log of agent actions

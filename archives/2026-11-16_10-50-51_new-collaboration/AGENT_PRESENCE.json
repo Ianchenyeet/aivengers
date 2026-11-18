@@ -1,0 +1,27 @@
+{
+  "updatedAt": "2026-11-16 11:48",
+  "onlineTimeoutMinutes": 15,
+  "sessionId": "session-2026-11-16_10-50-51",
+  "sessionFolder": "2026-11-16_10-50-51_new-collaboration",
+  "sessionTitle": "Collaboration Session",
+  "dispatchedAtIso": null,
+  "sessionCancelled": false,
+  "cancelledAtIso": null,
+  "sessionCompleted": false,
+  "completedAtIso": null,
+  "latestMessageNumber": 0,
+  "sessionMessages": [],
+  "cliPids": [],
+  "mainAgent": null,
+  "expectedParticipants": [],
+  "agentModels": {},
+  "savedSlots": null,
+  "plan": {
+    "status": "NONE",
+    "summary": "",
+    "reviewedBy": [],
+    "approvedByUser": false,
+    "updatedAt": null
+  },
+  "agents": {}
+}

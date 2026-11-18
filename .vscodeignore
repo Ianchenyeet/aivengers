@@ -1,0 +1,11 @@
+.git/**
+.gitignore
+archives/**
+DECISIONS.md
+PROJECT_STATE.md
+instructions/**
+node_modules/**
+*.vsix
+.tmp_*
+.DS_Store
+Thumbs.db

@@ -1,177 +1,90 @@
-# 🤖 Vibe Coding Tools — Multi-Agent Collaboration Workspace
+<h1 align="center">AIvengers</h1>
 
-A structured, zero-friction workspace architecture where different AI coding agents (such as **Google Antigravity**, **GitHub Copilot**, **Claude Code**, and **Cursor**) seamlessly cooperate, communicate, plan, and receive instructions from the user using file-based protocols.
-
----
-
-## 🌟 Key Capabilities
-
-- **📥 File-Based User Directives (`USER_INBOX.md`):** The human user writes goals, prompts, or feedback in a single markdown file; any active agent reads it and begins planning or execution.
-- **📋 Concurrency & Task Board (`TASKS.md`):** Shared Kanban board with agent claiming and **file-locking** to guarantee agents never overwrite each other's code.
-- **💬 Inter-Agent Message Board (`AGENT_COMMUNICATION.md`):** Threaded message board for agent-to-agent communication, handoffs (e.g. backend to frontend), review requests, questions, and blocker alerts.
-- **🏛️ Architecture Decision Records (`DECISIONS.md`):** Prevents "decision ping-pong" where agents contradict or rewrite each other's technical choices.
-- **📜 Chronological Audit Trail (`ACTIVITY_LOG.md`):** Full visibility into who changed what, when, and why.
-- **⚡ Lightweight Hub CLI (`scripts/hub.js`):** Fast, zero-dependency Node.js CLI tool for agents and users to view status, claim tasks, post handoff messages, and record logs without formatting errors.
-- **🔌 Multi-Platform Agent Support:** Pre-configured instruction files for **Antigravity** (`GEMINI.md`), **GitHub Copilot** (`.github/copilot-instructions.md`), **Cursor** (`.cursorrules` & `.cursor/rules/`), **Claude Code** (`CLAUDE.md`), and **Universal Agents** (`AGENTS.md`).
+<p align="center">
+  <strong>Assemble your installed AI coding agents — Google Antigravity, GitHub Copilot, Claude Code, OpenAI Codex, Cursor, Cline, Windsurf &amp; more — into one synchronized engineering team inside VS Code.</strong>
+</p>
 
 ---
 
-## 📂 Workspace Layout
+## What Does AIvengers Do?
 
-```
-vibe coding tools/
-├── USER_INBOX.md           # 📥 Where the user writes commands, goals & answers
-├── TASKS.md                # 📋 Shared task board with agent claims & file locks
-├── AGENT_COMMUNICATION.md  # 💬 Asynchronous inter-agent chat & handoffs
-├── DECISIONS.md            # 🏛️ Architecture Decision Records (ADRs)
-├── ACTIVITY_LOG.md         # 📜 Chronological activity & change log
-├── PROJECT_STATE.md        # 🧭 Quick tech stack & architecture snapshot
-├── instructions/           # 📖 Detailed feature specifications & PRDs
-│   └── README.md
-├── scripts/                # 🛠️ Hub coordination CLI utilities
-│   ├── hub.js
-│   └── README.md
-├── .github/
-│   └── copilot-instructions.md  # GitHub Copilot workspace configuration
-├── .cursor/
-│   └── rules/agent-collaboration.mdc # Cursor IDE rules
-├── .cursorrules            # Cursor legacy configuration
-├── GEMINI.md               # Google Antigravity & Gemini configuration
-├── CLAUDE.md               # Claude Code configuration
-├── AGENTS.md               # Universal Agent protocol specification
-├── package.json            # NPM helper scripts
-└── README.md               # This documentation
-```
+Instead of juggling separate chat tabs and copy-pasting context between different AI coding extensions, **AIvengers** adds a dedicated **AIvengers** collaboration tab in VS Code's Secondary Side Bar (right alongside Chat and Antigravity):
+
+- **Assemble a Multi-Agent Team in Seconds:** Choose your **Main** agent in **Slot 1** (who acts as Engineering Manager, coordinates tasks, submits plans, and verifies quality) and click **`+`** to split out extra teammate slots (**Slot 2, Slot 3, ...**) — or click **`⚡ Auto-Fill Installed Team`** to populate all detected agents at once.
+- **Same-Provider Multi-Model Teams & Live Copilot Tier Detection:** Run multiple different models from the same provider side by side (e.g., two Copilot models or two Antigravity models in one team), alongside Gemini 4 Argon / Hydrogen / Orchestrator, Claude, GPT-4.1, and o3 / o4-mini. AIvengers detects your GitHub Copilot tier (`Free`, `Pro`, `Pro+`, `Business`, `Enterprise`) and displays every agent's **Model Name** in team headers and reports.
+- **Two-Tab Slot Picker (`🤖 Agents & Models` | `🎨 Roles`) & RYB Color Mixing:** Assign **0, 1, or multiple** non-conflicting roles from 23 specialized roles across 6 categories (or keep any slot unrestricted with 0 roles), pick team presets (`2-Agent Duo`, `3-Agent Feature Squad`, `4-Agent Interactive / Game Team`), and see each slot's outline update to its subtractive RYB paint-mixed color while conflicting opposing roles are automatically disabled.
+- **Same-Session Continuity & Multi-Message History:** Follow-up prompts stay inside each agent's existing chat session by default while preserving `Message 1`, `Message 2`, ... in `USER_INBOX.md` and directing every teammate to work on the latest message.
+- **Attach Files & Folders Directly:** Use **`📎 Attach Files`** and **`📁 Attach Folder`** in the composer to pass context files and directories straight into `USER_INBOX.md`, Antigravity, and Copilot Chat.
+- **Signal-Only Feed & Interactive Plan Approval Polls:** No noisy agent chatter—only structured **Reports**, **Questions**, and **Polls** attributed by **Model Name** and role color appear in the AIvengers feed. Voting to approve an agent's plan poll automatically unlocks execution.
+- **User-Friendly Workspace Tools:** Browse & switch **Saved Collaborations (`🕘`)**, customize global and per-agent prompt templates in **Settings (`⚙️`)**, jump straight to live **`📋 Tasks`** and **`💬 Comms`**, promote any teammate to Main (**`★`**), filter the feed, copy reports, use built-in **Prompt Starters**, or open the in-app **Quick Guide (`?`)**.
+- **Passive Telemetry, File Locks & Credit-Exhaustion Failover:** Checks live IDE/agent processes in `<5ms`, locks files during edits via `TASKS.md`, supports reliable cancellation (`⏹ Stop`), and automatically promotes a **`Substitute Main`** if `Main` disconnects or hits a quota/credit limit.
 
 ---
 
-## 👤 How the Human User Interacts
+## How to Set Up & Use AIvengers (Zero CLI Commands or Manual Skill Setup)
 
-### 1. Write Naturally in `USER_INBOX.md` (Zero Restrictions)
-Open **`USER_INBOX.md`** and write what you want done in plain, casual language — exactly how you talk:
-```markdown
-# 📥 User Inbox
+**No terminal commands or manual `/assemble` skill installation are required.** Everything works immediately out of the box after installing the extension:
 
-create a dark mode toggle for the landing page and make sure unit tests pass
-```
-No rigid templates, no mandatory status tags, no YAML keys. Just write what you want.
+- **Automatic Kickoff Injection:** When you click **`Send ↑`**, AIvengers automatically injects the full collaboration protocol, file paths (`USER_INBOX.md`, `AGENTS.md`, `scripts/hub.js`), model-qualified `--agent` IDs, and active role instructions directly into each agent's kickoff prompt—even if the agent does not have pre-installed slash skills.
+- **Built-In Hub Fallback:** If your project does not contain a local `vibe coding tools` folder yet, AIvengers automatically runs from the hub bundled inside the extension so it works cleanly in any repository without modifying your repo files.
 
-### 2. Assemble the Agents You Want via `/assemble`
-Normal prompts in your agent windows will be answered normally without triggering multi-agent coordination.
-Whenever you want specific agents to work together on what's in `USER_INBOX.md`:
-1. Open the agent window you want (e.g. Antigravity, GitHub Copilot, Cursor, or Claude).
-2. Type:
-   ```
-   /assemble
-   ```
-3. That specific agent will assemble into the workspace, read your casual instructions from `USER_INBOX.md`, synchronize with any other assembled agents in `AGENT_COMMUNICATION.md`, claim tasks in `TASKS.md`, and start building!
+### Step-by-Step Setup & Usage
 
-### 3. Check Overall Workspace Status
-Run in terminal:
-```bash
-npm run status
-# or
-node scripts/hub.js assemble @Antigravity
-```
+1. **Open the AIvengers Tab:** Click the **AIvengers** icon in VS Code's Secondary Side Bar (`Ctrl+Alt+B` or Command Palette: **`AIvengers: Focus AIvengers Tab`**).
+2. **Choose Providers, Models & Optional Roles:**
+   - Click **`⚡ Auto-Fill Installed Team`**, or click **Slot 1 (`Main`)** to open the two-tab picker.
+   - Use **`🤖 Agents & Models`** to select the provider and exact model (or pick a preset like **2-Agent Duo**, **3-Agent Feature Squad**, or **4-Agent Interactive / Game Team**).
+   - Use **`🎨 Roles`** to optionally assign **0, 1, or multiple** non-conflicting roles (conflicting opposing roles are automatically grayed out, and slot borders light up with their RYB paint-mixed color).
+   - Click **`+`** next to the last slot to split out additional teammate slots—including a second or third distinct model from the same provider.
+3. *(Optional)* **Copy `/assemble` Skills & Hub Files to Your Workspace (1 Click):** If you want a standalone `vibe coding tools/` folder inside your project (including `.agents/skills/assemble/SKILL.md`, `.github/skills/assemble/SKILL.md`, `AGENTS.md`, `GEMINI.md`, `CLAUDE.md`, and `.cursorrules`), run Command Palette **`AIvengers: Initialize Drop-In AIvengers Hub Folder in Workspace`**, or click **`⚙️ Settings` → `Init Hub Folder`** (or **`📦 Init Hub in Workspace`** inside the **`?`** Quick Guide).
+4. **Attach Context & Send:** Type your task in the prompt box (or pick a built-in **Prompt Starter**), optionally attach files (**`📎`**) or folders (**`📁`**), and press **Enter** / **`Send ↑`**. *(For external/CLI agents enabled in Settings, click **`Copy Prompt`** on the dispatched message card and paste it into that agent's window.)*
+5. **Approve Plan Polls & Track Reports:** Follow progress directly in the **AIvengers** feed, where each teammate reports by its **Model Name** and role color, and vote on Plan Polls to authorize edits outside the hub.
 
 ---
 
-## 🤖 How AI Agents Operate
+## Supported Coding Agents
 
-- **Normal Prompt:** The agent operates as a standard single-agent assistant.
-- **When `/assemble` is typed:** The agent enters the **Multi-Agent Lifecycle**:
-
-```
-1. Assemble into Workspace  ──>  Triggered by user typing /assemble
-2. Ingest Casual Request   ──>  Read USER_INBOX.md
-3. Decompose & Plan        ──>  Break down into tasks in TASKS.md
-4. Lock Files & Claim      ──>  Set [IN PROGRESS] with agent name & target files
-5. Implement & Test        ──>  Work safely within locked files
-6. Handoff or Complete     ──>  Post in AGENT_COMMUNICATION.md & update ACTIVITY_LOG.md
-```
-
-### 🔒 File Locking (Preventing Collisions)
-Before modifying code:
-1. An agent checks `TASKS.md` for active tasks.
-2. If another agent lists `src/db.js` under `Locked Files`, **no other agent may touch `src/db.js`** until that task is marked `[DONE]` or `[IN REVIEW]`.
-3. To claim a task with CLI:
-   ```bash
-   node scripts/hub.js claim TASK-002 @Copilot "src/db.js" "tests/db.test.js"
-   ```
-
-### 🤝 Inter-Agent Handoffs & "Roger That" Receipts
-Example: `@Antigravity` builds the backend and wants `@Copilot` to create UI components and unit tests:
-```bash
-node scripts/hub.js msg --from "@Antigravity" --to "@Copilot" --type "HANDOFF" --subject "Backend API Ready" --body "API is in src/api.js. Please build the frontend React components in src/components/ and write tests."
-```
-`@Copilot` checks pending messages, confirms read ("Roger that!"), claims the next task in `TASKS.md`, and proceeds:
-```bash
-node scripts/hub.js read MSG-008 "@Copilot" "Roger that! Building UI now."
-# Or acknowledge all pending messages:
-node scripts/hub.js read all "@Copilot"
-```
+AIvengers automatically scans your locally installed IDE extensions and built-in agent hosts *(the official agent extension/client itself must still be installed and signed in on your machine)*:
+- **Google Antigravity** (`google.google-antigravity`) — Gemini 4 Argon / Hydrogen / Orchestrator (Argon), Gemini 3.8 Flash, Claude 5.5, GPT-OSS
+- **GitHub Copilot Chat** (`github.copilot-chat` / `github.copilot`) — Live `vscode.lm` & plan-filtered models
+- **Anthropic Claude Code** (`anthropic.claude-code` & built-in Claude Agent Host)
+- **OpenAI Codex / ChatGPT** (`openai.chatgpt` & built-in Codex Agent Host)
+- **Cline**, **Roo Code**, **Kilo Code**, **Continue**, **Windsurf**, **Sourcegraph Cody**, **Augment Code**, **Amazon Q**
 
 ---
 
-## 🛠️ Hub CLI Quick Reference
+## Platform & Antigravity Compliance (Official Extension Required)
 
-### Workspace Operations
-| Command | Description |
-| :--- | :--- |
-| `npm run status` | Display user directives, active tasks, locks, and messages |
-| `npm run inbox` | Print full content of `USER_INBOX.md` |
-| `npm run tasks` | Print full content of `TASKS.md` |
-| `node scripts/hub.js claim <ID> <Agent> [Files...]` | Claim task and set file locks |
-| `node scripts/hub.js complete <ID> <Agent>` | Mark task completed and log it |
-| `node scripts/hub.js msg --from <A> --to <B> --subject <S> --body <M>` | Post inter-agent message |
-| `node scripts/hub.js read <ID\|all> <Agent> [note]` | Confirm read on message(s) ("Roger that" receipt) |
-| `node scripts/hub.js unread <Agent>` | List unread messages addressed to an agent |
-| `node scripts/hub.js log --agent <A> --action <X> --files <F>` | Record action in audit log |
+AIvengers is strictly a **local workspace organization and prompt-dispatch tool**—it does **not** open, host, or emulate Antigravity (or any other coding agent) on other platforms:
 
-### 📦 Session Archiving & Resuming
-| Command | Description |
-| :--- | :--- |
-| `npm run archive:save [name]` | Save current collaboration files to `archives/<timestamp>_<name>/` |
-| `npm run archive:list` (or `npm run sessions`) | List all saved sessions with task stats and summaries |
-| `npm run archive:resume <name or index>` | Restore an archived session back into active workspace (auto-stashes active state) |
-| `npm run archive:new [name]` | Archive current session and prepare clean collaboration templates for a new sprint |
+- **Team Organization & Prompt Dispatch Only:** AIvengers helps you organize team slots, assign roles, coordinate tasks and reports through local Markdown hub files (`USER_INBOX.md`, `TASKS.md`, `AGENT_COMMUNICATION.md`), and forward your prompt to the agents you choose.
+- **Official Antigravity Must Already Be Installed:** To include Antigravity in a team, the original **Google Antigravity** extension/IDE (`google.google-antigravity`) must already be installed and signed in on your machine in its official environment. AIvengers simply sends your prompts directly to your locally installed official Antigravity instance using standard workspace commands.
+- **Native Extension Authentication Only:** Each coding agent uses its own official local installation and sign-in session; AIvengers stays strictly within your local editor workspace.
 
 ---
 
-## 📦 How Session Archiving & Resuming Works
+## Drop-In Portability & Zero Cross-Dependency Guarantee
 
-When a feature sprint or multi-agent co-development session concludes:
-
-1. **Save Current Session:**
-   ```bash
-   node scripts/hub.js archive save "vibe-commit-tool"
-   # or
-   npm run archive:save -- "vibe-commit-tool"
-   ```
-   Copies `USER_INBOX.md`, `TASKS.md`, `AGENT_COMMUNICATION.md`, `ACTIVITY_LOG.md`, and `PROJECT_STATE.md` into `archives/YYYY-MM-DD_vibe-commit-tool/` along with a `session.json` metadata file and an archive README.
-
-2. **Start a Fresh Session:**
-   ```bash
-   node scripts/hub.js archive new "vibe-prompt-enhancer"
-   ```
-   Archives the active files and resets the workspace to clean templates with empty task boards and instructions intact.
-
-3. **Browse Saved Sessions:**
-   ```bash
-   npm run sessions
-   ```
-
-4. **Resume Any Session:**
-   ```bash
-   node scripts/hub.js archive resume 1
-   # or by name:
-   node scripts/hub.js archive resume "vibe-commit-tool"
-   ```
-   Restores all collaboration files to the workspace root, takes an automatic safety backup of current active files in `archives/_stash_<timestamp>/`, and notifies active agents in `AGENT_COMMUNICATION.md`.
+Drop `vibe coding tools` into any repository to run a multi-agent session and move or remove it when finished:
+- **Reads Host Project Files:** Assembled agents inspect and edit your host project outside the hub folder.
+- **Zero Dependencies Outside → Inside:** No project file outside the hub folder ever imports or depends on hub files.
+- **Zero Hardcoded Dependencies Inside → Outside:** Collaboration state, task locks, and session archives remain cleanly inside the hub directory.
 
 ---
 
+## The 8-Step `/assemble` Team Workflow
+
+1. **Read `USER_INBOX.md` & Assemble:** Agents read `USER_INBOX.md` (executing the message marked **`LATEST`** plus any attachments) and run `node scripts/hub.js assemble "@Agent"`.
+2. **Gather Context:** Agents read their agent protocol `.md`, `TASKS.md`, and `AGENT_COMMUNICATION.md`, acknowledge unread messages, and inspect project files (read-only).
+3. **Wait for Team:** Agents run `node scripts/hub.js health` / `wait-team` (no edits outside the hub until approved).
+4. **Co-Author Plan:** Agents agree on roles and tasks and record `node scripts/hub.js plan draft`.
+5. **Interactive Poll Approval:** `Main` submits a checkpoint report + poll; voting approve on the poll unlocks execution.
+6. **Managed Execution & Locks:** `Main` acts as Engineering Manager; teammates claim tasks (`node scripts/hub.js claim`) and lock edited files.
+7. **Passive Health & Failover:** `node scripts/hub.js health` detects `CREDIT_EXHAUSTED` or `OFFLINE` peers and promotes a `Substitute Main` automatically if `Main` drops.
+8. **Milestones & Sign-Off:** Any agent posts milestones; only `Main` sends `final_summary` and posts `[SIGN-OFF]` to `@All` before anyone goes `OFFLINE`.
+
 ---
 
-## 🌐 Remote Discord Bridge Integration
-Agents configured with `discord-agent-bridge` can also send progress updates, ask polls, or provide completion summaries directly to the user's mobile/desktop Discord channel.
+## License
+
+MIT License — see `LICENSE` included in the extension package.

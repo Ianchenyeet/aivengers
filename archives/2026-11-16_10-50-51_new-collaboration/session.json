@@ -1,0 +1,31 @@
+{
+  "id": "session-2026-11-16_10-50-51",
+  "name": "collaboration-session",
+  "title": "Collaboration Session",
+  "folder": "2026-11-16_10-50-51_new-collaboration",
+  "updatedAt": "2026-11-16 11:48",
+  "updatedAtIso": "2026-11-16T03:48:32.749Z",
+  "archivedAt": "2026-11-16 11:48",
+  "mainAgent": null,
+  "participants": [],
+  "agentModels": {},
+  "savedSlots": null,
+  "sessionCancelled": false,
+  "summary": "General multi-agent workspace session",
+  "feedCount": 0,
+  "stats": {
+    "tasksCompleted": 1,
+    "tasksInProgress": 1,
+    "tasksReady": 2,
+    "messages": 1
+  },
+  "files": [
+    "USER_INBOX.md",
+    "TASKS.md",
+    "AGENT_COMMUNICATION.md",
+    "ACTIVITY_LOG.md",
+    "PROJECT_STATE.md",
+    "AGENT_PRESENCE.json",
+    "VIBE_FEED.json"
+  ]
+}

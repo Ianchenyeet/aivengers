@@ -12,6 +12,8 @@
 - [ADR-002: Tooling Runtime & Scripting Standard](#adr-002-tooling-runtime--scripting-standard)
 - [ADR-003: Session Archiving & Resuming Architecture](#adr-003-session-archiving--resuming-architecture)
 - [ADR-004: Opt-In /assemble Protocol & Casual User Inbox](#adr-004-opt-in-assemble-protocol--casual-user-inbox)
+- [ADR-005: Agent Presence & Liveness Protocol](#adr-005-agent-presence--liveness-protocol)
+- [ADR-006: Default 8-Step Team Workflow, Passive Telemetry, Credit Failover & Compact Formats](#adr-006-default-8-step-team-workflow-passive-telemetry-credit-failover--compact-formats)
 
 ---
 
@@ -73,3 +75,52 @@
 - **Consequences:**
   - **Positive:** Zero friction for the user; full control over which agents participate; normal single-agent prompts remain fast and unencumbered.
   - **Negative:** User must remember to type `/assemble` in the agent windows they want to join the collaborative task.
+
+---
+
+### `ADR-005`: Agent Presence & Liveness Protocol
+- **Date:** 2026-11-09
+- **Status:** `ACCEPTED`
+- **Deciders:** User, `@Antigravity`
+- **Context:**
+  When multiple agents operate in separate chat windows or IDE environments, they cannot inherently see whether peer agents are currently assembled, actively executing tasks, waiting, or offline. This led to uncertainty during handoffs and round-trip coordination.
+- **Decision:**
+  Implement real-time presence and heartbeat tracking backed by `AGENT_PRESENCE.json` and `scripts/hub.js`:
+  1. **States:** Each agent is tracked as `IDLE` (online & standing by), `RUNNING` (busy executing a task/operation), `WAITING` (waiting for peer or user), or `OFFLINE` (stale/timed out or signed off).
+  2. **Automatic Lifecycle Hooking:** Presence automatically updates during normal hub commands:
+     - `node scripts/hub.js assemble`: sets `IDLE` and logs initial timestamp.
+     - `node scripts/hub.js claim`: sets `RUNNING` with `currentTask`.
+     - `node scripts/hub.js complete`: resets to `IDLE` and clears task.
+     - `node scripts/hub.js msg` / `node scripts/hub.js read`: refreshes heartbeat timestamp and current activity.
+  3. **Explicit Commands & Queries:**
+     - `node scripts/hub.js peers`: renders formatted table with color badges, relative time ("just now", "5m ago"), and current activity.
+     - `node scripts/hub.js peers --check <@Agent>`: programmatic probe (exit code 0 if online, 1 if offline).
+     - `node scripts/hub.js peers --json`: returns machine-readable JSON for agents/scripts.
+     - `node scripts/hub.js ping <@Agent>`: explicit heartbeat.
+     - `node scripts/hub.js busy` / `idle` / `offline`: explicit state transitions.
+     - `node scripts/hub.js wait --for <@Agent>`: block/poll until peer activity or target state.
+  4. **Timeout Threshold:** Heartbeats older than 15 minutes are automatically categorized as `OFFLINE (Stale)` without requiring a background server daemon.
+- **Consequences:**
+  - **Positive:** Zero-dependency file-based presence; complete transparency across all agent sessions; instant peer status queries.
+  - **Negative:** Agents must invoke hub commands or heartbeats to keep their active timestamp fresh during long operations.
+
+---
+
+### `ADR-006`: Default 8-Step Team Workflow, Passive Telemetry, Credit Failover & Compact Formats
+- **Date:** 2026-11-09
+- **Status:** `ACCEPTED`
+- **Deciders:** User, `@Antigravity`
+- **Context:**
+  1. The user drops the `vibe coding tools` folder into external projects and moves it out later, requiring zero cross-dependencies between the host project and `vibe coding tools`.
+  2. Multi-agent collaboration needed a structured default workflow: waiting for all participants before editing host files, drafting plans while waiting, getting user plan approval in the collaboration tab via `Main`, having `Main` act as an Engineering Manager (less code-writing, more alignment/verification), handling accidental disconnects or credit exhaustion (`CREDIT_EXHAUSTED`) with automatic `Substitute Main` failover, and ensuring early finishers stay online to help until `Main` sends the sole `final_summary` report.
+  3. Manual status check-ins were slow and failed when an agent abruptly ran out of credits.
+  4. Verbose Markdown templates inflated `AGENT_COMMUNICATION.md`, `TASKS.md`, and `ACTIVITY_LOG.md`.
+- **Decision:**
+  1. **Zero Cross-Dependency Portability:** Agents read host project files outside `vibe coding tools`, but neither side may import or hardcode dependencies on the other.
+  2. **Passive Telemetry Engine (`probeAllPassiveTelemetry` in `scripts/hub.js`):** Passively tail-reads `<64KB` of Antigravity transcripts (`~/.gemini/antigravity/brain/*/.system_generated/logs/transcript.jsonl`), VS Code Copilot Agent Host logs (`%APPDATA%/Code/logs/*/agenthost.log`), and Claude Code project logs (`~/.claude/projects/*/*.jsonl`), plus OS PID checks (`process.kill(pid, 0)`). Instantly detects `RUNNING`, `WAITING_APPROVAL`, `IDLE`, `CREDIT_EXHAUSTED`, and `OFFLINE` in `<5ms` without requiring manual agent check-ins.
+  3. **Team Gate & Plan Approval (`wait-team`, `health`, `plan`):** Added `node scripts/hub.js wait-team`, `node scripts/hub.js health`, and `node scripts/hub.js plan [status|draft|review|approve]` to enforce team assembly and user plan approval before editing host project files.
+  4. **Automatic `Substitute Main` Failover:** If the designated `Main` agent is `OFFLINE` or `CREDIT_EXHAUSTED`, `hub.js health` automatically promotes the next online teammate to `Substitute Main` so it can poll the user (`node scripts/hub.js poll`).
+  5. **Compact Single-Line Markdown Formats:** Reduced messages, tasks, and activity logs to compact 1–2 line blocks with inline `✓:@Agent` read receipts and dual-format backward compatibility.
+- **Consequences:**
+  - **Positive:** 75%+ smaller Markdown files, `<5ms` passive online/credit-exhaustion detection, guaranteed user approval gate, and resilient manager failover.
+  - **Negative:** None; legacy Markdown formats remain readable via dual-format parsers.
