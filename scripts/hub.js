@@ -113,16 +113,6 @@ function readFileTailFast(filePath, maxBytes = 65536) {
   }
 }
 
-function isPidAlive(pid) {
-  if (!pid || typeof pid !== 'number') return false;
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch (e) {
-    return e.code === 'EPERM';
-  }
-}
-
 function parseArgs(args) {
   const flags = {};
   const positional = [];
@@ -814,7 +804,7 @@ function getCombinedAgentStatuses(timeoutMinutes = DEFAULT_ONLINE_TIMEOUT_MIN) {
       lastSeenIso: bestIso,
       relativeTime: formatRelativeTime(bestIso),
       source,
-      pidAlive: rec && rec.pid ? isPidAlive(rec.pid) : null
+      pidAlive: rec && rec.pid ? isOnline : null
     };
   }
 
