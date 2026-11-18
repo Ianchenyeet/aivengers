@@ -5,7 +5,6 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { execFile, spawn } = require('child_process');
-const https = require('https');
 const roleDefs = require('./src/roles/roleDefinitions');
 
 const VIEW_ID = 'vibeCoding.panel';
@@ -390,7 +389,7 @@ let cachedCopilotPlan = null;
 let cachedCopilotPlanTs = 0;
 
 /**
- * Detects the signed-in user's GitHub Copilot plan (Free, Pro, Pro+, Business, Enterprise) non-interactively.
+ * Infers chat model availability using the official VS Code `vscode.lm` API non-interactively.
  */
 async function detectCopilotUserPlan(forceRefresh = false) {
   const now = Date.now();
@@ -401,7 +400,7 @@ async function detectCopilotUserPlan(forceRefresh = false) {
 
   const fallback = {
     tier: 'unknown',
-    label: 'Copilot',
+    label: 'Chat Models',
     sku: '',
     rawPlan: '',
     chatEnabled: true,
@@ -409,105 +408,37 @@ async function detectCopilotUserPlan(forceRefresh = false) {
   };
 
   try {
-    if (!vscode.authentication || typeof vscode.authentication.getSession !== 'function') {
+    if (!vscode.lm || typeof vscode.lm.selectChatModels !== 'function') {
       cachedCopilotPlan = fallback;
       cachedCopilotPlanTs = now;
       return fallback;
     }
 
-    let session = null;
-    for (const scopes of [['read:user'], ['user:email'], []]) {
-      try {
-        session = await withTimeout(
-          vscode.authentication.getSession('github', scopes, { createIfNone: false }),
-          1800,
-          null
-        );
-        if (session && session.accessToken) break;
-      } catch {}
-    }
-
-    if (!session || !session.accessToken) {
-      const signedOut = { ...fallback, label: 'Copilot (Not Signed In)' };
-      cachedCopilotPlan = signedOut;
-      cachedCopilotPlanTs = now;
-      return signedOut;
-    }
-
-    const data = await new Promise((resolve) => {
-      const req = https.get(
-        'https://api.github.com/copilot_internal/user',
-        {
-          headers: {
-            Authorization: `token ${session.accessToken}`,
-            'User-Agent': 'AIvengers-VSCode',
-            Accept: 'application/json',
-            'X-GitHub-Api-Version': '2025-04-01',
-          },
-        },
-        (res) => {
-          let body = '';
-          res.on('data', (chunk) => {
-            body += chunk;
-          });
-          res.on('end', () => {
-            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-              try {
-                resolve(JSON.parse(body));
-                return;
-              } catch {}
-            }
-            resolve(null);
-          });
-        }
-      );
-      req.on('error', () => resolve(null));
-      req.setTimeout(3500, () => {
-        try {
-          req.destroy();
-        } catch {}
-        resolve(null);
-      });
-    });
-
-    if (!data || typeof data !== 'object') {
-      cachedCopilotPlan = fallback;
-      cachedCopilotPlanTs = now;
-      return fallback;
-    }
-
-    const rawPlan = String(data.copilot_plan || data.plan || '').toLowerCase();
-    const sku = String(data.sku || '').toLowerCase();
-    const combined = `${rawPlan} ${sku}`;
+    const models = await withTimeout(vscode.lm.selectChatModels({ vendor: 'copilot' }), 2000, []).catch(() => []);
+    const liveCount = Array.isArray(models) ? models.length : 0;
+    const families = new Set(
+      (Array.isArray(models) ? models : []).map((m) => String(m.family || m.id || '').toLowerCase())
+    );
 
     let tier = 'unknown';
-    let label = 'Copilot';
-    if (/\bfree\b|free_limited/.test(combined)) {
-      tier = 'free';
-      label = 'Copilot Free';
-    } else if (/pro_plus|pro\+|individual_pro\+|copilot_max|\bmax\b/.test(combined)) {
-      tier = 'pro_plus';
-      label = 'Copilot Pro+';
-    } else if (/enterprise/.test(combined)) {
-      tier = 'enterprise';
-      label = 'Copilot Enterprise';
-    } else if (/business/.test(combined)) {
-      tier = 'business';
-      label = 'Copilot Business';
-    } else if (/pro|individual/.test(combined)) {
-      tier = 'pro';
-      label = 'Copilot Pro';
-    } else if (rawPlan) {
-      label = `Copilot (${rawPlan})`;
+    let label = liveCount > 0 ? 'Live Tier' : 'Default';
+    if (liveCount > 0) {
+      if (Array.from(families).some((f) => /opus|o3|gpt-5/.test(f))) {
+        tier = 'pro_plus';
+        label = 'Full Live Models';
+      } else {
+        tier = 'pro';
+        label = 'Active Live Models';
+      }
     }
 
     const result = {
       tier,
       label,
-      sku: String(data.sku || ''),
-      rawPlan: String(data.copilot_plan || ''),
-      chatEnabled: data.chat_enabled !== false,
-      detected: true,
+      sku: '',
+      rawPlan: tier,
+      chatEnabled: true,
+      detected: liveCount > 0,
     };
     cachedCopilotPlan = result;
     cachedCopilotPlanTs = now;
@@ -996,7 +927,7 @@ async function launchSingleAgent(
   const spawnAgyCli = () => {
     const exe = resolveAgyCliPath();
     if (!exe) return false;
-    const args = ['--mode', 'auto', '--dangerously-skip-permissions'];
+    const args = ['--mode', 'auto'];
     if (!shouldStartNewChat && providerInstanceIndex === 0) {
       args.push('-c');
     }
@@ -1262,9 +1193,12 @@ class VibeCodingViewProvider {
   killActiveChildProcesses() {
     for (const child of this.activeChildProcesses) {
       try {
-        if (process.platform === 'win32' && child.pid) {
-          spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
-        } else {
+        if (child.pid) {
+          try {
+            process.kill(child.pid, 'SIGTERM');
+          } catch {}
+        }
+        if (typeof child.kill === 'function') {
           child.kill('SIGTERM');
         }
       } catch {}

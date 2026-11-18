@@ -3334,11 +3334,7 @@ function cmdCancel(flags = {}) {
   for (const pid of pidsToKill) {
     if (!pid || typeof pid !== 'number') continue;
     try {
-      if (process.platform === 'win32') {
-        execFileSync('taskkill', ['/pid', String(pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
-      } else {
-        process.kill(pid, 'SIGTERM');
-      }
+      process.kill(pid, 'SIGTERM');
     } catch {}
   }
   presence.cliPids = [];

@@ -147,7 +147,7 @@
         "vibeCoding.attachInboxFile": {
           "type": "boolean",
           "default": true,
-          "description": "Attach USER_INBOX.md context when opening GitHub Copilot Chat."
+          "description": "Attach USER_INBOX.md context when launching workspace chat participants."
         },
         "vibeCoding.requirePlanApproval": {
           "type": "boolean",
@@ -177,7 +177,7 @@
           "type": "string",
           "enum": ["ui_with_cli_fallback", "ui_only", "cli_only"],
           "default": "ui_with_cli_fallback",
-          "description": "How Antigravity is assembled on dispatch: IDE UI with agy CLI fallback if un-assembled, UI only, or CLI only."
+          "description": "How host agent panels are assembled on dispatch: IDE UI with CLI fallback if un-assembled, UI only, or CLI only."
         },
         "vibeCoding.globalPromptTemplate": {
           "type": "string",
@@ -187,31 +187,10 @@
         "vibeCoding.agentPrompts": {
           "type": "object",
           "default": {},
-          "description": "Per-agent prompt customizations keyed by agent key (e.g. '@Antigravity', '@Copilot') with { mode: 'append'|'override', template: string }."
+          "description": "Per-agent prompt customizations keyed by participant slot key with { mode: 'append'|'override', template: string }."
         }
       }
     }
-  },
-  "scripts": {
-    "status": "node scripts/hub.js status",
-    "peers": "node scripts/hub.js peers",
-    "who": "node scripts/hub.js peers",
-    "health": "node scripts/hub.js health",
-    "check-team": "node scripts/hub.js check-team",
-    "wait-team": "node scripts/hub.js wait-team",
-    "plan": "node scripts/hub.js plan",
-    "inbox": "node scripts/hub.js inbox",
-    "tasks": "node scripts/hub.js tasks",
-    "read": "node scripts/hub.js read",
-    "unread": "node scripts/hub.js unread",
-    "commit": "node src/vibe-commit.js",
-    "context": "node src/vibe-context.js",
-    "archive:save": "node scripts/hub.js archive save",
-    "archive:list": "node scripts/hub.js archive list",
-    "archive:resume": "node scripts/hub.js archive resume",
-    "archive:new": "node scripts/hub.js archive new",
-    "sessions": "node scripts/hub.js archive list",
-    "help": "node scripts/hub.js help"
   },
   "keywords": [
     "aivengers",
@@ -222,7 +201,7 @@
     "teamwork",
     "chat"
   ],
-  "author": "Ianchenyeet",
+  "author": "Ian Chen",
   "license": "MIT",
   "repository": {
     "type": "git",

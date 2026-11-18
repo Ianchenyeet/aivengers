@@ -1,5 +1,9 @@
 .git/**
 .gitignore
+.cursorrules
+.cursor/**
+.github/**
+.agents/**
 archives/**
 DECISIONS.md
 PROJECT_STATE.md
