@@ -1,8 +1,6 @@
-<h1 align="center">AIvengers</h1>
+# AIvengers
 
-<p align="center">
-  <strong>Assemble your locally installed VS Code AI coding extensions and built-in chat participants into one synchronized engineering team.</strong>
-</p>
+**Assemble your locally installed VS Code AI coding extensions and built-in chat participants into one synchronized engineering team.**
 
 ---
 
@@ -46,10 +44,10 @@ Instead of juggling separate chat tabs and copy-pasting context between differen
 
 AIvengers automatically scans your **locally installed** VS Code AI coding extensions, built-in chat participants, and available `vscode.lm` language models in your current editor environment.
 
-AIvengers is strictly a **local workspace organization and prompt-dispatch tool**—it does **not** open, host, or emulate Antigravity or any other agent extension on other platforms:
+AIvengers is strictly a **local workspace organization and prompt-dispatch tool**—it does **not** open, host, or run local agent extensions on other platforms:
 
 - **Team Organization & Prompt Dispatch Only:** AIvengers helps you organize team slots, assign roles, coordinate tasks and reports through local Markdown hub files (`USER_INBOX.md`, `TASKS.md`, `AGENT_COMMUNICATION.md`), and forward your prompt to the agents you choose.
-- **Official Local Extensions Required:** To include an agent (such as Antigravity or any other IDE chat assistant) in a team, the original official extension/client must already be installed and signed in on your machine in its native environment. AIvengers simply forwards your prompts to those locally installed official extensions using standard editor commands.
+- **Official Local Extensions Required:** To include an agent or IDE chat assistant in a team, the original official extension/client must already be installed and signed in on your machine in its native environment. AIvengers simply forwards your prompts to those locally installed official extensions using standard editor commands.
 - **Native Extension Authentication Only:** Each coding assistant uses its own official local installation and sign-in session; AIvengers operates strictly within your local editor workspace.
 
 ---

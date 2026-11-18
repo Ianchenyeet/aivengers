@@ -14,8 +14,7 @@
   },
   "categories": [
     "AI",
-    "Chat",
-    "Programming Languages"
+    "Chat"
   ],
   "activationEvents": [
     "onStartupFinished",
@@ -205,7 +204,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Ianchenyeet/aivengers.git"
+    "url": "https://github.com/Ianchenyeet/aivengers"
   },
   "homepage": "https://github.com/Ianchenyeet/aivengers#readme",
   "bugs": {
