@@ -1,9 +1,9 @@
 {
   "name": "aivengers",
   "displayName": "AIvengers",
-  "version": "2.2.0",
+  "version": "1.0.0",
   "publisher": "Ianchenyeet",
-  "description": "AIvengers — Multi-Agent AI Coding Hub for VS Code. Organize role-colored AI agent teams with RYB paint-mixed slots, interactive plan polls, and shared Markdown workflows.",
+  "description": "Multi-agent workflow and task coordination hub for VS Code with role-based slots, interactive plan polls, and shared Markdown logs.",
   "icon": "media/icon.png",
   "galleryBanner": {
     "color": "#0b132b",
@@ -18,24 +18,24 @@
   ],
   "activationEvents": [
     "onStartupFinished",
-    "onView:vibeCoding.panel"
+    "onView:aivengers.panel"
   ],
   "main": "./extension.js",
   "contributes": {
     "viewsContainers": {
       "secondarySidebar": [
         {
-          "id": "vibe-coding-sidebar",
+          "id": "aivengers-sidebar",
           "title": "AIvengers",
           "icon": "media/aivengers-icon.svg"
         }
       ]
     },
     "views": {
-      "vibe-coding-sidebar": [
+      "aivengers-sidebar": [
         {
           "type": "webview",
-          "id": "vibeCoding.panel",
+          "id": "aivengers.panel",
           "name": "AIvengers",
           "icon": "media/aivengers-icon.svg"
         }
@@ -43,54 +43,54 @@
     },
     "commands": [
       {
-        "command": "vibeCoding.focus",
+        "command": "aivengers.focus",
         "title": "Focus AIvengers Tab",
         "category": "AIvengers"
       },
       {
-        "command": "vibeCoding.newSession",
+        "command": "aivengers.newSession",
         "title": "New Multi-Agent Session",
         "category": "AIvengers",
         "icon": "$(clear-all)"
       },
       {
-        "command": "vibeCoding.refreshAgents",
+        "command": "aivengers.refreshAgents",
         "title": "Rescan Installed Agents",
         "category": "AIvengers",
         "icon": "$(refresh)"
       },
       {
-        "command": "vibeCoding.openInbox",
+        "command": "aivengers.openInbox",
         "title": "Open USER_INBOX.md",
         "category": "AIvengers",
         "icon": "$(file-text)"
       },
       {
-        "command": "vibeCoding.openSettings",
+        "command": "aivengers.openSettings",
         "title": "AIvengers Settings",
         "category": "AIvengers",
         "icon": "$(settings-gear)"
       },
       {
-        "command": "vibeCoding.openGuide",
+        "command": "aivengers.openGuide",
         "title": "About AIvengers & Quick Start Guide",
         "category": "AIvengers",
         "icon": "$(question)"
       },
       {
-        "command": "vibeCoding.initWorkspaceHub",
+        "command": "aivengers.initWorkspaceHub",
         "title": "Initialize Drop-In AIvengers Hub Folder in Workspace",
         "category": "AIvengers",
         "icon": "$(folder-library)"
       },
       {
-        "command": "vibeCoding.cancelSession",
+        "command": "aivengers.cancelSession",
         "title": "Cancel Ongoing Collaboration Session",
         "category": "AIvengers",
         "icon": "$(stop-circle)"
       },
       {
-        "command": "vibeCoding.openHistory",
+        "command": "aivengers.openHistory",
         "title": "Browse Saved Collaborations",
         "category": "AIvengers",
         "icon": "$(history)"
@@ -99,28 +99,28 @@
     "menus": {
       "view/title": [
         {
-          "command": "vibeCoding.refreshAgents",
-          "when": "view == vibeCoding.panel",
+          "command": "aivengers.refreshAgents",
+          "when": "view == aivengers.panel",
           "group": "navigation"
         },
         {
-          "command": "vibeCoding.newSession",
-          "when": "view == vibeCoding.panel",
+          "command": "aivengers.newSession",
+          "when": "view == aivengers.panel",
           "group": "navigation"
         },
         {
-          "command": "vibeCoding.openInbox",
-          "when": "view == vibeCoding.panel",
+          "command": "aivengers.openInbox",
+          "when": "view == aivengers.panel",
           "group": "navigation"
         },
         {
-          "command": "vibeCoding.openGuide",
-          "when": "view == vibeCoding.panel",
+          "command": "aivengers.openGuide",
+          "when": "view == aivengers.panel",
           "group": "navigation"
         },
         {
-          "command": "vibeCoding.openSettings",
-          "when": "view == vibeCoding.panel",
+          "command": "aivengers.openSettings",
+          "when": "view == aivengers.panel",
           "group": "navigation"
         }
       ]
@@ -128,37 +128,37 @@
     "configuration": {
       "title": "AIvengers",
       "properties": {
-        "vibeCoding.autoLaunchAgents": {
+        "aivengers.autoLaunchAgents": {
           "type": "boolean",
           "default": true,
           "description": "Automatically launch all selected AIvengers slot agents when sending a prompt."
         },
-        "vibeCoding.startNewConversation": {
+        "aivengers.startNewConversation": {
           "type": "boolean",
           "default": false,
           "description": "Start a brand-new chat conversation on every message instead of reusing the same agent chat session within a collaboration."
         },
-        "vibeCoding.keepFocusOnSend": {
+        "aivengers.keepFocusOnSend": {
           "type": "boolean",
           "default": true,
           "description": "Keep focus in the AIvengers tab after launching agents."
         },
-        "vibeCoding.attachInboxFile": {
+        "aivengers.attachInboxFile": {
           "type": "boolean",
           "default": true,
           "description": "Attach USER_INBOX.md context when launching workspace chat participants."
         },
-        "vibeCoding.requirePlanApproval": {
+        "aivengers.requirePlanApproval": {
           "type": "boolean",
           "default": true,
           "description": "Require explicit user plan approval before editing host project files outside the AIvengers hub folder."
         },
-        "vibeCoding.showAllKnownAgents": {
+        "aivengers.showAllKnownAgents": {
           "type": "boolean",
           "default": false,
           "description": "Also show known coding agents that are not currently installed as VS Code extensions."
         },
-        "vibeCoding.customModels": {
+        "aivengers.customModels": {
           "type": "array",
           "default": [],
           "description": "Custom model entries ({ agentKey, id, label, group }) added to slot model dropdowns.",
@@ -172,18 +172,18 @@
             }
           }
         },
-        "vibeCoding.antigravityLaunchMode": {
+        "aivengers.antigravityLaunchMode": {
           "type": "string",
           "enum": ["ui_with_cli_fallback", "ui_only", "cli_only"],
           "default": "ui_with_cli_fallback",
           "description": "How host agent panels are assembled on dispatch: IDE UI with CLI fallback if un-assembled, UI only, or CLI only."
         },
-        "vibeCoding.globalPromptTemplate": {
+        "aivengers.globalPromptTemplate": {
           "type": "string",
           "default": "",
           "description": "Custom instruction template sent to all participating AIvengers agents (supports {{agent}}, {{roleLabel}}, {{mainAgent}}, {{teamList}}, {{modelNote}}, {{planRule}}, {{userPrompt}}, {{activeMessageDirective}}, {{attachmentsNote}})."
         },
-        "vibeCoding.agentPrompts": {
+        "aivengers.agentPrompts": {
           "type": "object",
           "default": {},
           "description": "Per-agent prompt customizations keyed by participant slot key with { mode: 'append'|'override', template: string }."

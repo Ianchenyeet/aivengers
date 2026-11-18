@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const { execFile, spawn } = require('child_process');
 const roleDefs = require('./src/roles/roleDefinitions');
 
-const VIEW_ID = 'vibeCoding.panel';
+const VIEW_ID = 'aivengers.panel';
 const STATE_SLOTS_KEY = 'vibeCoding.selectedSlots.v2';
 const STATE_SETTINGS_KEY = 'vibeCoding.settings.v1';
 const OTHERS_PREFIX = 'others (';
@@ -1253,7 +1253,14 @@ class VibeCodingViewProvider {
     const stored = this.context.workspaceState.get(STATE_SETTINGS_KEY) || {};
     let cfg = {};
     try {
-      const vsCfg = vscode.workspace.getConfiguration('vibeCoding');
+      const legacyCfg = vscode.workspace.getConfiguration('vibeCoding');
+      if (legacyCfg) {
+        for (const k of Object.keys(DEFAULT_SETTINGS)) {
+          const val = legacyCfg.get(k);
+          if (val !== undefined) cfg[k] = val;
+        }
+      }
+      const vsCfg = vscode.workspace.getConfiguration('aivengers');
       if (vsCfg) {
         for (const k of Object.keys(DEFAULT_SETTINGS)) {
           const val = vsCfg.get(k);
@@ -1268,7 +1275,7 @@ class VibeCodingViewProvider {
     const merged = { ...this.getSettings(), ...(patch || {}) };
     await this.context.workspaceState.update(STATE_SETTINGS_KEY, merged);
     try {
-      const vsCfg = vscode.workspace.getConfiguration('vibeCoding');
+      const vsCfg = vscode.workspace.getConfiguration('aivengers');
       if (vsCfg && typeof vsCfg.update === 'function') {
         for (const [k, v] of Object.entries(patch || {})) {
           await vsCfg.update(k, v, vscode.ConfigurationTarget.Global);
@@ -2071,7 +2078,7 @@ class VibeCodingViewProvider {
         break;
 
       case 'openVsCodeSettings':
-        await vscode.commands.executeCommand('workbench.action.openSettings', 'vibeCoding.');
+        await vscode.commands.executeCommand('workbench.action.openSettings', 'aivengers.');
         break;
 
       case 'openFile':
@@ -6499,23 +6506,23 @@ function activate(context) {
     vscode.window.registerWebviewViewProvider(VIEW_ID, provider, {
       webviewOptions: { retainContextWhenHidden: true },
     }),
-    vscode.commands.registerCommand('vibeCoding.focus', () => {
+    vscode.commands.registerCommand('aivengers.focus', () => {
       vscode.commands.executeCommand(`${VIEW_ID}.focus`);
     }),
-    vscode.commands.registerCommand('vibeCoding.refreshAgents', () => provider.refreshAgents()),
-    vscode.commands.registerCommand('vibeCoding.newSession', () => provider.newSession()),
-    vscode.commands.registerCommand('vibeCoding.openInbox', () => provider.openInboxFile()),
-    vscode.commands.registerCommand('vibeCoding.openSettings', () => provider.openSettingsPanel()),
-    vscode.commands.registerCommand('vibeCoding.openGuide', () => provider.openGuidePanel()),
-    vscode.commands.registerCommand('vibeCoding.initWorkspaceHub', () => provider.initWorkspaceHub()),
-    vscode.commands.registerCommand('vibeCoding.cancelSession', () => provider.cancelOngoingSession('Stopped via command')),
-    vscode.commands.registerCommand('vibeCoding.openHistory', () => provider.openHistoryPanel()),
+    vscode.commands.registerCommand('aivengers.refreshAgents', () => provider.refreshAgents()),
+    vscode.commands.registerCommand('aivengers.newSession', () => provider.newSession()),
+    vscode.commands.registerCommand('aivengers.openInbox', () => provider.openInboxFile()),
+    vscode.commands.registerCommand('aivengers.openSettings', () => provider.openSettingsPanel()),
+    vscode.commands.registerCommand('aivengers.openGuide', () => provider.openGuidePanel()),
+    vscode.commands.registerCommand('aivengers.initWorkspaceHub', () => provider.initWorkspaceHub()),
+    vscode.commands.registerCommand('aivengers.cancelSession', () => provider.cancelOngoingSession('Stopped via command')),
+    vscode.commands.registerCommand('aivengers.openHistory', () => provider.openHistoryPanel()),
     vscode.extensions.onDidChange(() => provider.refreshAgents()),
     vscode.lm && typeof vscode.lm.onDidChangeChatModels === 'function'
       ? vscode.lm.onDidChangeChatModels(() => provider.refreshAgents())
       : { dispose() {} },
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration('vibeCoding')) {
+      if (e.affectsConfiguration('aivengers') || e.affectsConfiguration('vibeCoding')) {
         provider.refreshAgents();
       }
     }),
