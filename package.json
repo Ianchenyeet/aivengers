@@ -3,7 +3,7 @@
   "displayName": "AIvengers",
   "version": "1.0.0",
   "publisher": "Ianchenyeet",
-  "description": "Multi-agent workflow and task coordination hub for VS Code with role-based slots, interactive plan polls, and shared Markdown logs.",
+  "description": "Multi-agent workflow and task coordination hub with role-based slots, interactive plan polls, and shared Markdown logs.",
   "icon": "media/icon.png",
   "galleryBanner": {
     "color": "#0b132b",
@@ -13,8 +13,8 @@
     "vscode": "^1.80.0"
   },
   "categories": [
-    "AI",
-    "Chat"
+    "Machine Learning",
+    "Other"
   ],
   "activationEvents": [
     "onStartupFinished",
@@ -192,13 +192,10 @@
     }
   },
   "keywords": [
-    "aivengers",
-    "multi-agent",
-    "ai-agents",
-    "orchestration",
     "workflow",
-    "teamwork",
-    "chat"
+    "markdown",
+    "tasks",
+    "collaboration"
   ],
   "author": "Ian Chen",
   "license": "MIT",

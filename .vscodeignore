@@ -1,5 +1,6 @@
 .git/**
 .gitignore
+.env*
 .cursorrules
 .cursor/**
 .github/**
@@ -17,6 +18,7 @@ AGENT_PRESENCE.json
 VIBE_FEED.json
 instructions/**
 skills/**
+media/vibe-icon.svg
 scripts/wait-for-peer.js
 scripts/README.md
 src/vibe-commit.js
